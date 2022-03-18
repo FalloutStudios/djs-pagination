@@ -4,7 +4,7 @@
   "name": "@ghextercortes/djs-pagination",
   "main": "dist/index.js",
   "license": "MIT",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "keywords": [
     "djs",
     "discord.js",
