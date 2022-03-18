@@ -85,7 +85,7 @@ Adds embed to the pagination.
 Sets The buttons for the pagination.
 |Param|Type|Required|Default|Description|
 |---|---|---|---|---|
-|builder|[AddButtonType]()|Yes|[Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)([PaginationButton](#BuilderConstructor))\|[PaginationButton](#BuilderConstructor)|The builder function or constructor to create the buttons|
+|builder|[AddButtonType](https://github.com/GhexterCortes/djs-pagination/blob/main/src/util/Buttons.ts#L26)|Yes|[Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)([PaginationButton](#BuilderConstructor))\|[PaginationButton](#BuilderConstructor)|The builder function or constructor to create the buttons|
 
 <details>
     <summary>Builder constructor</summary>
@@ -98,7 +98,7 @@ Button builder constructor.
 Adds a button to the pagination.
 |Param|Type|Required|Default|Description|
 |---|---|---|---|---|
-|type|[AddButtonType]()|Yes|None|The type of button to add|
+|type|[AddButtonType](https://github.com/GhexterCortes/djs-pagination/blob/main/src/util/Buttons.ts#L26)|Yes|None|The type of button to add|
 |button|[MessageButton](https://discord.js.org/#/docs/main/stable/class/MessageButton)|Yes|None|The button to add|
 
 ### getButtons
@@ -116,7 +116,7 @@ Sets the filter for the pagination.
 ## Properties
 ### buttons
 Buttons for the pagination.
-Type: [Buttons]()
+Type: [Buttons](https://github.com/GhexterCortes/djs-pagination/blob/main/src/util/Buttons.ts#L3)
 
 ### filter
 Filter for the pagination.
@@ -155,14 +155,14 @@ Sets inactivity timeout for the pagination.
 Sets the action when the pagination collector ended.
 |Param|Type|Required|Default|Description|
 |---|---|---|---|---|
-|action|[OnDisableAction]()|Yes|OnDisableAction.DISABLE_BUTTONS|The action to do when the pagination collector ended|
+|action|[OnDisableAction](https://github.com/GhexterCortes/djs-pagination/blob/main/src/index.ts#L6)|Yes|OnDisableAction.DISABLE_BUTTONS|The action to do when the pagination collector ended|
 
 ### paginate `Async`
 Sends the pagination.
 |Param|Type|Required|Default|Description|
 |---|---|---|---|---|
 |parent|[Message](https://discord.js.org/#/docs/main/stable/class/Message)\|[CommandInteraction](https://discord.js.org/#/docs/main/stable/class/CommandInteraction)\|[ButtonInteraction](https://discord.js.org/#/docs/main/stable/class/ButtonInteraction)|Yes|None|The parent message|
-|sendAs|[SendAs]()|No|SendAs.REPLY_MESSAGE|The send as type|
+|sendAs|[SendAs](https://github.com/GhexterCortes/djs-pagination/blob/main/src/index.ts#L25)|No|SendAs.REPLY_MESSAGE|The send as type|
 
 ### setCurrentPage `Async`
 Set Pagination's current page
@@ -203,5 +203,5 @@ Adds collector to sent pagination message.
 ### send `Async`
 Sends the pagination.
 |Param|Type|Required|Default|Description|
-|sendAs|[SendAs]()|No|SendAs.REPLY_MESSAGE|The send as type|
+|sendAs|[SendAs](https://github.com/GhexterCortes/djs-pagination/blob/main/src/index.ts#L25)|No|SendAs.REPLY_MESSAGE|The send as type|
 </details>
