@@ -212,5 +212,6 @@ Adds collector to sent pagination message.
 ### send `Async`
 Sends the pagination.
 |Param|Type|Required|Default|Description|
+|---|---|---|---|---|
 |sendAs|[SendAs](https://github.com/GhexterCortes/djs-pagination/blob/main/src/index.ts#L25)|No|SendAs.REPLY_MESSAGE|The send as type|
 </details>
