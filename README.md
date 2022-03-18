@@ -3,7 +3,7 @@ Simple pagination for Discord.js written in TypeScript.
 
 ## Installation
 ```bash
-npm i djs-pagination
+npm i @ghextercortes/djs-pagination
 ```
 
 ## Examples
