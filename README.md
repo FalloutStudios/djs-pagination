@@ -1,5 +1,11 @@
 # Djs Pagination
+![npm bundle size (scoped)](https://img.shields.io/bundlephobia/min/@ghextercortes/djs-pagination?style=flat-square)
+![GitHub](https://img.shields.io/github/license/GhexterCortes/djs-pagination?style=flat-square)
+![npm (scoped)](https://img.shields.io/npm/v/@ghextercortes/djs-pagination?label=Latest%20Version&style=flat-square)
+
 Simple pagination for Discord.js written in TypeScript.
+
+For more simple pagination you can use the [discordjs-pagination](https://github.com/acegoal07/discordjs-pagination) package.
 
 ## Installation
 ```bash
@@ -10,7 +16,7 @@ npm i @ghextercortes/djs-pagination
 
 Typescript
 ```typescript
-import { Pagination, ButtonType, OnDisableAction } from 'djs-pagination';
+import { Pagination, ButtonType, OnDisableAction } from '@ghextercortes/djs-pagination';
 
 // Create a new Pagination
 const pagination = new Pagination()
@@ -40,7 +46,7 @@ pagination.paginate(Message|Interaction);
 
 Javascript
 ```typescript
-const { Pagination, ButtonType, OnDisableAction } = require('djs-pagination');
+const { Pagination, ButtonType, OnDisableAction } = require('@ghextercortes/djs-pagination');
 
 // Create a new Pagination
 const pagination = new Pagination()
@@ -133,6 +139,7 @@ Set if the pagination should allow only the author of parent message to interact
 ### setAuthor
 Sets the pagination author.
 > This is automatically set but can be changed.
+
 |Param|Type|Required|Default|Description|
 |---|---|---|---|---|
 |author|[UserResolvable](https://discord.js.org/#/docs/main/stable/typedef/UserResolvable)|Yes|None|The author of the pagination|
@@ -140,6 +147,7 @@ Sets the pagination author.
 ### setMaxInteractions
 Sets the maximum interactions for the pagination.
 > Max interaction is not limited by default.
+
 |Param|Type|Required|Default|Description|
 |---|---|---|---|---|
 |max|[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)|Yes|None|The maximum interactions|
@@ -147,6 +155,7 @@ Sets the maximum interactions for the pagination.
 ### setTimer
 Sets inactivity timeout for the pagination.
 > Timeout is set to 60000ms.
+
 |Param|Type|Required|Default|Description|
 |---|---|---|---|---|
 |interval|[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)|Yes|60000|The timeout in milliseconds. The lowest is 3000ms|
