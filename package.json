@@ -14,6 +14,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "compile": "npm run clean && tsc",
+    "publish": "npm publish --access public",
     "test:run": "cd test && node index.js",
     "test:compile": "npm run compile && npm run test:run"
   },
