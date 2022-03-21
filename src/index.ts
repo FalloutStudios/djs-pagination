@@ -185,6 +185,7 @@ export class Pagination extends EventEmitter {
      */
     async paginate(parent: Message | CommandInteraction | ButtonInteraction, sendAs: SendAs = SendAs.REPLY_MESSAGE): Promise<Pagination> {
         if (!parent) throw new TypeError("Parent is undefined");
+        if (this.collector) throw new Error("Pagination is already sent or the collector is already defined!");
 
         this.parentMessage = parent;
         this.author = this.author || this.getAuthor(parent);
