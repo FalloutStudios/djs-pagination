@@ -176,7 +176,8 @@ export class Pagination extends EventEmitter {
      * Action to perform when the pagination is disabled
      */
     setOnDisableAction(action: OnDisableAction): Pagination {
-        this.onDisable = action || this.onDisable;
+        if (!OnDisableAction[action]) action = OnDisableAction.DISABLE_BUTTONS;
+        this.onDisable = action;
         return this;
     }
 
