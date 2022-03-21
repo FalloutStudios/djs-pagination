@@ -4,7 +4,7 @@
   "name": "@ghextercortes/djs-pagination",
   "main": "dist/index.js",
   "license": "MIT",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "keywords": [
     "djs",
     "discord.js",
@@ -16,7 +16,7 @@
     "compile": "npm run clean && tsc",
     "test:run": "cd test && node index.js",
     "test:compile": "npm run compile && npm run test:run",
-    "publish": "npm run compile && npm install && sleep 1 && npm publish --access public"
+    "build": "npm run compile && npm install && sleep 1 && npm publish --access public"
   },
   "repository": {
     "type": "git",
