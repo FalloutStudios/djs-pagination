@@ -108,6 +108,29 @@ export class Pagination extends EventEmitter {
 
     /**
      * 
+     * Adds multiple embeds
+     */
+    addPages(pages: MessageEmbed[], content?: string[]): Pagination {
+        if (!pages || !pages.length) throw new TypeError("Pages is undefined or empty");
+        if (!Array.isArray(pages)) throw new TypeError("Pages is not an array");
+
+        let i = 0;
+
+        for (const page of pages) {
+            if (!page) throw new TypeError("Page is undefined");
+            if (!(page instanceof MessageEmbed)) throw new TypeError("Page is not an instance of MessageEmbed");
+
+            this.pagesEmbed.push(page);
+            this.pagesText.push(content && content[i] ? content[i] : null);
+
+            i++;
+        }
+
+        return this;
+    }
+
+    /**
+     * 
      * Add the buttons
      */
     setButtons(builder: Buttons.AddButtonType): Pagination {
@@ -192,8 +215,9 @@ export class Pagination extends EventEmitter {
         this.author = this.author || this.getAuthor(parent);
 
         await this.send(sendAs);
-        this.addCollector();
+        this.emit('pageChange', this.currentPage);
 
+        this.addCollector();
         return this;
     }
 
@@ -210,14 +234,13 @@ export class Pagination extends EventEmitter {
 
         if (this.pagination instanceof Message) {
             await this.pagination.edit(this.getCurrentPage<MessageOptions>(addButtons, disabledButtons));
-            this.emit('pageChange', this.currentPage);
         } else if (this.pagination instanceof CommandInteraction || this.pagination instanceof ButtonInteraction) {
             await this.pagination.editReply(this.getCurrentPage<WebhookEditMessageOptions>(addButtons, disabledButtons));
-            this.emit('pageChange', this.currentPage);
         } else {
             throw new TypeError("Pagination is not an instance of Message, CommandInteraction or ButtonInteraction");
         }
 
+        if (addButtons && !disabledButtons) this.emit('pageChange', this.currentPage);
         return this;
     }
 
