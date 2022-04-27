@@ -400,10 +400,10 @@ export class Pagination extends EventEmitter {
                     if(!this.parentMessage.replied) {
                         await this.parentMessage.reply(this.getCurrentPage<WebhookEditMessageOptions>());
                     } else {
-                        this.parentMessage.followUp(this.getCurrentPage<WebhookEditMessageOptions>());
+                        await this.parentMessage.followUp(this.getCurrentPage<WebhookEditMessageOptions>());
                     }
 
-                    this.pagination = this.parentMessage;
+                    this.pagination = await this.parentMessage.fetchReply() as Message;
                     return this.pagination;
                 }
         }
