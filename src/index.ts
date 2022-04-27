@@ -1,4 +1,4 @@
-import { ButtonInteraction, CollectorFilter, CommandInteraction, GuildMember, InteractionCollector, Message, MessageComponentInteraction, MessageEmbed, MessageEmbedOptions, MessageOptions, User, UserResolvable, WebhookEditMessageOptions } from 'discord.js';
+import { ButtonInteraction, CollectorFilter, CommandInteraction, GuildMember, Interaction, InteractionCollector, Message, MessageComponentInteraction, MessageEmbed, MessageEmbedOptions, MessageOptions, User, UserResolvable, WebhookEditMessageOptions } from 'discord.js';
 import * as Buttons from './util/Buttons';
 import { EventEmitter } from 'events';
 
@@ -207,7 +207,7 @@ export class Pagination extends EventEmitter {
     /**
      * Send pagination
      */
-    async paginate(parent: Message | CommandInteraction | ButtonInteraction, sendAs: SendAs = SendAs.REPLY_MESSAGE): Promise<Pagination> {
+    async paginate(parent: AcceptedParentType, sendAs: SendAs = SendAs.REPLY_MESSAGE): Promise<Pagination> {
         if (!parent) throw new TypeError("Parent is undefined");
         if (this.collector) throw new Error("Pagination is already sent or the collector is already defined!");
 
@@ -232,10 +232,12 @@ export class Pagination extends EventEmitter {
 
         this.currentPage = page;
 
-        if (this.pagination instanceof Message) {
-            await this.pagination.edit(this.getCurrentPage<MessageOptions>(addButtons, disabledButtons));
-        } else if (this.pagination instanceof CommandInteraction || this.pagination instanceof ButtonInteraction) {
-            await this.pagination.editReply(this.getCurrentPage<WebhookEditMessageOptions>(addButtons, disabledButtons));
+
+        // TODO:
+        if (Pagination.messageInstanceof(this.pagination) == 'MESSAGE') {
+            await (this.pagination as Message).edit(this.getCurrentPage<MessageOptions>(addButtons, disabledButtons));
+        } else if (Pagination.messageInstanceof(this.pagination) == 'INTERACTION') {
+            await (this.pagination as CommandInteraction).editReply(this.getCurrentPage<WebhookEditMessageOptions>(addButtons, disabledButtons));
         } else {
             throw new TypeError("Pagination is not an instance of Message, CommandInteraction or ButtonInteraction");
         }
@@ -270,11 +272,11 @@ export class Pagination extends EventEmitter {
         return options;
     }
 
-    private getAuthor(parent: Message | CommandInteraction | ButtonInteraction): User {
-        if (parent instanceof Message) {
-            return parent.author;
-        } else if (parent instanceof CommandInteraction || parent instanceof ButtonInteraction) {
-            return parent.user || parent.member?.user;
+    private getAuthor(parent: AcceptedParentType): User {
+        if (Pagination.messageInstanceof(parent) == 'MESSAGE') {
+            return (parent as Message).author;
+        } else if (Pagination.messageInstanceof(parent) == 'INTERACTION') {
+            return (parent as CommandInteraction).user || parent.member?.user;
         } else {
             throw new TypeError("Parent is not an instance of Message, CommandInteraction or ButtonInteraction");
         }
@@ -286,16 +288,18 @@ export class Pagination extends EventEmitter {
         const filter = this.buttons?.setFilter(undefined, this.authorIndependent && this.author ? this.author.id : undefined).filter;
         if (typeof filter === 'function') this.collectorFilter = filter;
 
-        if (this.pagination instanceof Message) {
-            this.collector = this.pagination.createMessageComponentCollector({
+        if (Pagination.messageInstanceof(this.pagination) == 'MESSAGE') {
+            this.collector = (this.pagination as Message).createMessageComponentCollector({
                 filter: this.collectorFilter,
                 max: this.collectorMaxInteractions ?? 0,
                 time: this.collectorTimer
             });
-        } else if (this.pagination instanceof CommandInteraction || this.pagination instanceof ButtonInteraction) {
+        } else if (Pagination.messageInstanceof(this.pagination) == 'INTERACTION') {
+            this.pagination = this.pagination as CommandInteraction;
+
             const message = await this.pagination.fetchReply();
-            if (message instanceof Message) {
-                this.collector = message.createMessageComponentCollector({
+            if (message) {
+                this.collector = (message as Message).createMessageComponentCollector({
                     filter: this.collectorFilter,
                     max: this.collectorMaxInteractions ?? 0,
                     time: this.collectorTimer
@@ -341,11 +345,11 @@ export class Pagination extends EventEmitter {
                     await this.setCurrentPage(this.currentPage, false);
                     break;
                 case OnDisableAction.DELETE_MESSAGE:
-                    if (this.pagination instanceof Message) {
-                        await this.pagination.delete().catch(() => undefined);
+                    if (Pagination.messageInstanceof(this.pagination) == 'MESSAGE') {
+                        await (this.pagination as Message).delete().catch(() => undefined);
                         break;
-                    } else if (this.pagination instanceof CommandInteraction || this.pagination instanceof ButtonInteraction) {
-                        await this.pagination.deleteReply().catch(() => undefined);
+                    } else if (Pagination.messageInstanceof(this.pagination) == 'INTERACTION') {
+                        await (this.pagination as CommandInteraction).deleteReply().catch(() => undefined);
                         break;
                     }
                     
@@ -366,20 +370,19 @@ export class Pagination extends EventEmitter {
         if (!this.parentMessage) throw new TypeError("Parent message is undefined");
         switch (sendType) {
             case SendAs.NEW_MESSAGE:
-                if (this.parentMessage instanceof Message) {
-                    this.pagination = await this.parentMessage.channel.send(this.getCurrentPage<MessageOptions>());
-                    return this.pagination;
-                } else if (this.parentMessage instanceof CommandInteraction || this.parentMessage instanceof ButtonInteraction) {
+                if (Pagination.messageInstanceof(this.parentMessage) === 'MESSAGE' || Pagination.messageInstanceof(this.parentMessage) == 'INTERACTION') {
                     this.pagination = await this.parentMessage.channel?.send(this.getCurrentPage<MessageOptions>());
                     return this.pagination;
                 }
 
                 throw new TypeError("Parent message is not an instance of Message or CommandInteraction or ButtonInteraction");
             case SendAs.EDIT_MESSAGE:
-                if (this.parentMessage instanceof Message) {
-                    this.pagination = await this.parentMessage.edit(this.getCurrentPage<MessageOptions>());
+                if (Pagination.messageInstanceof(this.parentMessage) === 'MESSAGE') {
+                    this.pagination = await (this.parentMessage as Message).edit(this.getCurrentPage<MessageOptions>());
                     return this.pagination;
-                } else if (this.parentMessage instanceof CommandInteraction || this.parentMessage instanceof ButtonInteraction) {
+                } else if (Pagination.messageInstanceof(this.parentMessage) === 'INTERACTION') {
+                    this.parentMessage = this.parentMessage as CommandInteraction;
+
                     await this.parentMessage.editReply(this.getCurrentPage<WebhookEditMessageOptions>());
 
                     this.pagination = this.parentMessage;
@@ -388,10 +391,12 @@ export class Pagination extends EventEmitter {
 
                 throw new TypeError("Parent message is not an instance of Message or CommandInteraction or ButtonInteraction");
             case SendAs.REPLY_MESSAGE:
-                if (this.parentMessage instanceof Message) {
-                    this.pagination = await this.parentMessage.reply(this.getCurrentPage<MessageOptions>());
+                if (Pagination.messageInstanceof(this.parentMessage) === 'MESSAGE') {
+                    this.pagination = await (this.parentMessage as Message).reply(this.getCurrentPage<MessageOptions>());
                     return this.pagination;
-                } else if (this.parentMessage instanceof CommandInteraction || this.parentMessage instanceof ButtonInteraction) {
+                } else if (Pagination.messageInstanceof(this.parentMessage) === 'INTERACTION') {
+                    this.parentMessage = this.parentMessage as CommandInteraction;
+
                     if(!this.parentMessage.replied) {
                         await this.parentMessage.reply(this.getCurrentPage<WebhookEditMessageOptions>());
                     } else {
@@ -402,5 +407,15 @@ export class Pagination extends EventEmitter {
                     return this.pagination;
                 }
         }
+    }
+
+    public static messageInstanceof(pagination?: AcceptedParentType): 'MESSAGE'|'INTERACTION'|'UNKNOWN' {
+        if ((pagination as Message)?.content) {
+            return 'MESSAGE';
+        } else if ((pagination as Interaction)?.user) {
+            return 'INTERACTION';
+        }
+
+        return 'UNKNOWN';
     }
 }
