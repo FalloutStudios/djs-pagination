@@ -1,4 +1,4 @@
-import { Awaitable, CollectedInteraction, CommandInteraction, If, Interaction, InteractionCollector, Message, MessageCollector, MessageComponentCollectorOptions, MessageComponentInteraction, MessageComponentType, ModalSubmitInteraction } from 'discord.js';
+import { Awaitable, CollectedInteraction, CommandInteraction, EmbedBuilder, If, Interaction, InteractionCollector, Message, MessageCollector, MessageComponentCollectorOptions, MessageComponentInteraction, MessageComponentType, ModalSubmitInteraction } from 'discord.js';
 import EventEmitter from 'events';
 import { Page } from '../types/pagination';
 
@@ -53,12 +53,14 @@ export class PaginationBase<Paginated extends boolean = boolean, ComponentType e
     /**
      * Add pages to pagination 
      */
-    public addPages(...pages: (Page|string)[]) {
+    public addPages(...pages: (Page|EmbedBuilder|string)[]) {
         if (!pages.length) return this;
         
         for (const page of pages) {
             if (typeof page === 'string') {
                 this.pages.push({ content: page });
+            } else if (page instanceof EmbedBuilder) {
+                this.pages.push({ embeds: [page] });
             } else if (typeof page === 'object' && !Array.isArray(page)) {
                 this.pages.push(page);
             } else {
@@ -72,7 +74,7 @@ export class PaginationBase<Paginated extends boolean = boolean, ComponentType e
     /**
      * Clear existing pages and add new pages to pagination 
      */
-    public setPages(...pages: Page[]) {
+    public setPages(...pages: (Page|EmbedBuilder|string)[]) {
         this.pages = [];
         this.addPages(...pages);
         
