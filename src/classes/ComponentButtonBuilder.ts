@@ -4,15 +4,15 @@ import { ActionRowBuilder, APIButtonComponent, ButtonBuilder, ButtonStyle, Messa
 
 export interface ComponentButton {
     customId: string;
-    type: ComponentButtonType;
+    type: PaginationButtonType;
 }
 
 export interface SetButtonOption {
     button: ButtonBuilder|APIButtonComponent;
-    type: ComponentButtonType;
+    type: PaginationButtonType;
 }
 
-export enum ComponentButtonType {
+export enum PaginationButtonType {
     /**
      * First page button
      */
@@ -43,7 +43,7 @@ export class ComponentButtonBuilder extends ComponentBuilderBase {
         super(options);
     }
 
-    public addButton(button: ButtonBuilder|APIButtonComponent, type: ComponentButtonType): ComponentButtonBuilder {
+    public addButton(button: ButtonBuilder|APIButtonComponent, type: PaginationButtonType): ComponentButtonBuilder {
         if (button instanceof ButtonBuilder) button = button.toJSON();
         if (button.style == ButtonStyle.Link) throw new TypeError('Link buttons cannot be used for pagination');
 
@@ -66,7 +66,7 @@ export class ComponentButtonBuilder extends ComponentBuilderBase {
         return actionRow.setComponents(this.buttons.map(b => new ButtonBuilder(b).setDisabled(disabled)));
     }
 
-    private _setButtonId(customId: string, type: ComponentButtonType): void {
+    private _setButtonId(customId: string, type: PaginationButtonType): void {
         this.componentButtons.push({ customId, type });
     }
 }

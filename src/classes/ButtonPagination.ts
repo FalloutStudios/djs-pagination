@@ -1,5 +1,5 @@
 import { OnDisableAction, Page, PageWithComponents, RepliableInteraction, SendAs } from '../types/pagination';
-import { ComponentButtonBuilder, ComponentButtonType } from './ComponentButtonBuilder';
+import { ComponentButtonBuilder, PaginationButtonType } from './ComponentButtonBuilder';
 import { PaginationBase, PaginationBaseEvents, PaginationBaseOptions } from './PaginationBase';
 
 import { APIUser, Awaitable, ButtonBuilder, Interaction, InteractionType, Message, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, User } from 'discord.js';
@@ -10,12 +10,13 @@ export interface ButtonPaginationOptions extends PaginationBaseOptions {
     onDisable?: OnDisableAction;
     authorIndependent?: boolean;
     singlePageNoButtons?: boolean;
+    timer?: number;
     authorId?: string;
     collectorOptions?: MessageCollectorOptionsParams<MessageComponentType>;
 }
 
 export interface ButtonPaginationEvents extends PaginationBaseEvents {
-    "componentInteraction": [componentType: ComponentButtonType, component: MessageComponentInteraction];
+    "componentInteraction": [componentType: PaginationButtonType, component: MessageComponentInteraction];
 }
 
 export interface ButtonPagination extends PaginationBase {
@@ -52,6 +53,7 @@ export class ButtonPagination extends PaginationBase {
         this.onDisable = options?.onDisable ?? this.onDisable;
         this.authorIndependent = options?.authorIndependent ?? this.authorIndependent;
         this.singlePageNoButtons = options?.singlePageNoButtons ?? this.singlePageNoButtons;
+        this.timer = options?.timer ?? this.timer;
         this.authorId = options?.authorId ?? this.authorId;
         this.collectorOptions = options?.collectorOptions ?? this.collectorOptions;
     }
@@ -119,7 +121,7 @@ export class ButtonPagination extends PaginationBase {
     /**
      * Add button to pagination 
      */
-    public addButton(button: ButtonBuilder, type: ComponentButtonType): ButtonPagination {
+    public addButton(button: ButtonBuilder, type: PaginationButtonType): ButtonPagination {
         this.buttons.addButton(button, type);
         return this;
     }
@@ -239,19 +241,19 @@ export class ButtonPagination extends PaginationBase {
             }
 
             switch (action.type) {
-                case ComponentButtonType.FirstPage:
+                case PaginationButtonType.FirstPage:
                     this.setCurrentPage(0);
                     break;
-                case ComponentButtonType.PreviousPage:
+                case PaginationButtonType.PreviousPage:
                     this.setCurrentPage(this.currentPage - 1 < 0 ? this.pages.length - 1 : this.currentPage - 1);
                     break;
-                case ComponentButtonType.StopInteraction:
+                case PaginationButtonType.StopInteraction:
                     this.collector?.stop();
                     break;
-                case ComponentButtonType.NextPage:
+                case PaginationButtonType.NextPage:
                     this.setCurrentPage(this.currentPage + 1 > this.pages.length - 1 ? 0 : this.currentPage + 1);
                     break;
-                case ComponentButtonType.LastPage:
+                case PaginationButtonType.LastPage:
                     this.setCurrentPage(this.pages.length - 1);
                     break;
             }
