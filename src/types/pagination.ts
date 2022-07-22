@@ -1,4 +1,4 @@
-import { APIEmbed, EmbedBuilder, MessageOptions, StickerResolvable } from 'discord.js';
+import { APIEmbed, CommandInteraction, EmbedBuilder, MessageComponentInteraction, MessageOptions, ModalSubmitInteraction, StickerResolvable } from 'discord.js';
 
 export interface Page {
     tss?: boolean;
@@ -47,3 +47,5 @@ export enum SendAs {
      */
     ReplyMessage
 }
+
+export type RepliableInteraction = CommandInteraction|MessageComponentInteraction|ModalSubmitInteraction;

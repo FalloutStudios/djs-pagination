@@ -1,18 +1,19 @@
-import { Awaitable, CollectedInteraction, CommandInteraction, EmbedBuilder, If, Interaction, InteractionCollector, Message, MessageCollector, MessageComponentCollectorOptions, MessageComponentInteraction, MessageComponentType, ModalSubmitInteraction } from 'discord.js';
+import { Awaitable, CollectedInteraction, CommandInteraction, EmbedBuilder, If, Interaction, InteractionCollector, InteractionResponseFields, MappedInteractionTypes, Message, MessageCollector, MessageComponentCollectorOptions, MessageComponentInteraction, MessageComponentType, ModalSubmitInteraction } from 'discord.js';
 import EventEmitter from 'events';
-import { Page } from '../types/pagination';
+import { OnDisableAction, Page, RepliableInteraction } from '../types/pagination';
 
 export interface PaginationBaseOptions {
     pages?: Page[];
 }
 
 export interface PaginationBaseEvents {
+    "ready": [];
     "pageChange": [page: Page, index: number];
     "collectorCollect": [interaction: MessageComponentInteraction];
-    "collectorEnd": [reason: string];
+    "collectorEnd": [reason: string, disableAction: OnDisableAction];
 }
 
-export interface PaginationBase<Paginated extends boolean = boolean, ComponentType extends CollectedInteraction = CollectedInteraction> extends EventEmitter {
+export interface PaginationBase extends EventEmitter {
     on<E extends keyof PaginationBaseEvents>(event: E, listener: (...args: PaginationBaseEvents[E]) => Awaitable<void>): this;
     on<E extends string|symbol>(event: Exclude<E, keyof PaginationBaseEvents>, listener: (...args: any) => Awaitable<void>): this;
 
@@ -30,12 +31,12 @@ export interface PaginationBase<Paginated extends boolean = boolean, ComponentTy
     removeAllListeners(event?: string|symbol): this;
 }
 
-export class PaginationBase<Paginated extends boolean = boolean, ComponentType extends CollectedInteraction = CollectedInteraction> extends EventEmitter {
+export class PaginationBase extends EventEmitter {
     public pages: Page[] = [];
     public currentPage: number = 0;
-    public pagination!: Paginated extends true ? Message : undefined;
-    public command!: Paginated extends true ? Message|Interaction : undefined;
-    public collector?: InteractionCollector<ComponentType>;
+    public pagination?: Message;
+    public command?: Message|RepliableInteraction;
+    public collector?: InteractionCollector<MappedInteractionTypes[MessageComponentType]>;
 
     constructor(options?: PaginationBaseOptions) {
         super();
@@ -79,13 +80,5 @@ export class PaginationBase<Paginated extends boolean = boolean, ComponentType e
         this.addPages(...pages);
         
         return this;
-    }
-
-    /**
-     * Is the pagination started
-     */
-    public isPaginated(): this is PaginationBase<true, ComponentType>;
-    public isPaginated(): boolean {
-        return !!this.pagination && !!this.command;
     }
 }
