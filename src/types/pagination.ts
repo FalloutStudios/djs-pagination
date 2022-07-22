@@ -1,8 +1,13 @@
-import { APIEmbed, EmbedBuilder, MessageOptions } from 'discord.js';
+import { APIEmbed, EmbedBuilder, MessageOptions, StickerResolvable } from 'discord.js';
 
 export interface Page {
+    tss?: boolean;
     content?: string;
     embeds?: (EmbedBuilder|APIEmbed)[];
+    allowedMentions?: MessageOptions["allowedMentions"];
+    attachments?: MessageOptions["attachments"];
+    files?: MessageOptions["files"];
+    stickers?: StickerResolvable[];
 }
 
 export interface PageWithComponents extends Page {
