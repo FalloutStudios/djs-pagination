@@ -4,7 +4,7 @@
   "name": "@ghextercortes/djs-pagination",
   "main": "dist/index.js",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "keywords": [
     "djs",
     "discord.js",
@@ -12,11 +12,11 @@
   ],
   "homepage": "https://github.com/GhexterCortes/djs-pagination#readme",
   "scripts": {
-    "clean": "rimraf dist",
-    "compile": "npm run clean && tsc",
-    "test:run": "cd test && node index.js",
-    "test:compile": "npm run compile && npm run test:run",
-    "build": "npm run compile && npm install && npm publish --access public"
+    "clean": "rm -rf dist",
+    "build": "yarn run clean && npx tsc",
+    "test": "cd test && npx reciple",
+    "test:build": "yarn run build && yarn run test",
+    "build:publish": "yarn run build && yarn publish --access public"
   },
   "repository": {
     "type": "git",
@@ -31,8 +31,17 @@
     "README.md"
   ],
   "devDependencies": {
-    "@types/node": "^17.0.27",
-    "discord.js": "^13.6.0",
-    "typescript": "^4.6.3"
+    "@types/ms": "^0.7.31",
+    "@types/node": "^18.0.6",
+    "discord.js": "^14.0.3",
+    "reciple": "^3.0.2",
+    "typescript": "^4.7.4"
+  },
+  "peerDependencies": {
+    "discord.js": "^14.0.3"
+  },
+  "packageManager": "yarn@1.22.19",
+  "dependencies": {
+    "ms": "^2.1.3"
   }
 }
