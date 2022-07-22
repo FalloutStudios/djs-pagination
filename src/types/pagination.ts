@@ -1,8 +1,12 @@
-import { EmbedBuilder, EmbedData } from 'discord.js';
+import { APIEmbed, EmbedBuilder, MessageOptions } from 'discord.js';
 
 export interface Page {
     content?: string;
-    embeds?: (EmbedBuilder|EmbedData)[];
+    embeds?: (EmbedBuilder|APIEmbed)[];
+}
+
+export interface PageWithComponents extends Page {
+    components?: MessageOptions["components"];
 }
 
 export enum OnDisableAction {
