@@ -23,7 +23,14 @@ export class ButtonPagination<Paginated extends boolean = boolean> extends Pagin
     public collectorOptions?: MessageComponentCollectorOptions<CollectedMessageInteraction>;
 
     constructor(options?: ButtonPaginationOptions) {
-        super(options)
+        super(options);
+
+        this.buttons = options?.buttons ?? this.buttons;
+        this.onDisable = options?.onDisable ?? this.onDisable;
+        this.authorIndependent = options?.authorIndependent ?? this.authorIndependent;
+        this.singlePageNoButtons = options?.singlePageNoButtons ?? this.singlePageNoButtons;
+        this.authorId = options?.authorId ?? this.authorId;
+        this.collectorOptions = options?.collectorOptions ?? this.collectorOptions;
     }
 
     public setTimer(timer: number|string): ButtonPagination<Paginated> {
@@ -92,5 +99,19 @@ export class ButtonPagination<Paginated extends boolean = boolean> extends Pagin
     public isPaginated(): this is ButtonPagination<true>;
     public isPaginated(): boolean {
         return super.isPaginated();
+    }
+
+    public makeOptions(includePages: boolean = true): ButtonPaginationOptions {
+        const options: ButtonPaginationOptions = {
+            pages: includePages ? this.pages : [],
+            authorId: this.authorId,
+            authorIndependent: this.authorIndependent,
+            buttons: this.buttons,
+            collectorOptions: this.collectorOptions,
+            onDisable: this.onDisable,
+            singlePageNoButtons: this.singlePageNoButtons
+        };
+
+        return options;
     }
 }

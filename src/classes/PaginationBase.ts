@@ -3,7 +3,7 @@ import EventEmitter from 'events';
 import { Page } from '../types/pagination';
 
 export interface PaginationBaseOptions {
-    pages: Page[];
+    pages?: Page[];
 }
 
 export interface PaginationBaseEvents {
