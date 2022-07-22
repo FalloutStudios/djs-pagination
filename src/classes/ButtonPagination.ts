@@ -33,6 +33,16 @@ export class ButtonPagination<Paginated extends boolean = boolean> extends Pagin
         this.collectorOptions = options?.collectorOptions ?? this.collectorOptions;
     }
 
+    /**
+     *  Sets disable interaction interval in milliseconds
+     */
+    public setTimer(timer: number): ButtonPagination<Paginated>;
+    /**
+     * Sets disable interaction interval, eg:
+     * - 10s
+     * - 20m
+     */
+    public setTimer(timer: string): ButtonPagination<Paginated>;
     public setTimer(timer: number|string): ButtonPagination<Paginated> {
         if (typeof timer == 'string') {
             this.timer = ms(timer);
@@ -46,21 +56,33 @@ export class ButtonPagination<Paginated extends boolean = boolean> extends Pagin
         return this;
     }
 
+    /**
+     * Set if the pagination should only work for pagination author 
+     */
     public setAuthorIndependent(authorIndependent: boolean): ButtonPagination<Paginated> {
         this.authorIndependent = authorIndependent;
         return this;
     }
 
+    /**
+     * Set what action would happen on pagination timeout 
+     */
     public setOnDisableAction(action: OnDisableAction): ButtonPagination<Paginated> {
         this.onDisable = action;
         return this;
     }
 
+    /**
+     * Set if pagination should disable buttons if there's only single page 
+     */
     public setSinglePageNoButtons(singlePageNoButtons: boolean): ButtonPagination<Paginated> {
         this.singlePageNoButtons = singlePageNoButtons;
         return this;
     }
 
+    /**
+     * Sets the pagination author Id 
+     */
     public setAuthorId(authorId: string|User|APIUser): ButtonPagination<Paginated> {
         if (typeof authorId == 'string') {
             this.authorId = authorId;
@@ -71,12 +93,20 @@ export class ButtonPagination<Paginated extends boolean = boolean> extends Pagin
         return this;
     } 
 
+    /**
+     * Add button to pagination 
+     */
     public addButton(button: ButtonBuilder, type: ButtonType): ButtonPagination<Paginated> {
         this.buttons.addButton(button, type);
         return this;
     }
 
-    public async setCurrentPage(index: number): Promise<Page> {
+    /**
+     * Sets current page 
+     */
+    public async setCurrentPage(index?: number): Promise<Page> {
+        index = index ?? this.currentPage;
+
         if (!this.isPaginated()) throw new Error('Pagination is not yet ready');
         if (index < 0 || index > this.pages.length) throw new TypeError('index is out of range');
 
@@ -86,7 +116,7 @@ export class ButtonPagination<Paginated extends boolean = boolean> extends Pagin
 
         return page;
     }
-
+    
     public getPage(index: number, disableButton?: boolean): PageWithComponents {
         const page: PageWithComponents|undefined = super.getPage(index);
         if (!page) throw new Error(`Can\'t find page with index ${index}`);
@@ -101,6 +131,9 @@ export class ButtonPagination<Paginated extends boolean = boolean> extends Pagin
         return super.isPaginated();
     }
 
+    /**
+     * Returns pagination options as JSON object 
+     */
     public makeOptions(includePages: boolean = true): ButtonPaginationOptions {
         const options: ButtonPaginationOptions = {
             pages: includePages ? this.pages : [],
