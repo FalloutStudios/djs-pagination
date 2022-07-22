@@ -43,10 +43,16 @@ export class PaginationBase<Paginated extends boolean = boolean, ComponentType e
         this.pages = options?.pages ?? [];
     }
 
+    /**
+     * Get page data 
+     */
     public getPage(pageIndex: number): Page|undefined {
         return this.pages[pageIndex];
     }
 
+    /**
+     * Add pages to pagination 
+     */
     public addPages(...pages: (Page|string)[]) {
         if (!pages.length) return this;
         
@@ -63,6 +69,9 @@ export class PaginationBase<Paginated extends boolean = boolean, ComponentType e
         return this;
     }
 
+    /**
+     * Clear existing pages and add new pages to pagination 
+     */
     public setPages(...pages: Page[]) {
         this.pages = [];
         this.addPages(...pages);
@@ -70,6 +79,9 @@ export class PaginationBase<Paginated extends boolean = boolean, ComponentType e
         return this;
     }
 
+    /**
+     * Is the pagination started
+     */
     public isPaginated(): this is PaginationBase<true, ComponentType>;
     public isPaginated(): boolean {
         return !!this.pagination && !!this.command;
