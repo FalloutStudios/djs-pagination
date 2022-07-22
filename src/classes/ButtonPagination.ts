@@ -1,8 +1,9 @@
-import { APIUser, Awaitable, ButtonBuilder, CollectedMessageInteraction, Interaction, InteractionCollector, InteractionType, MappedInteractionTypes, Message, MessageCollectorOptionsParams, MessageComponentCollectorOptions, MessageComponentInteraction, MessageComponentType, User } from 'discord.js';
-import ms from 'ms';
 import { OnDisableAction, Page, PageWithComponents, RepliableInteraction, SendAs } from '../types/pagination';
+import { ComponentButtonBuilder, ComponentButtonType } from './ComponentButtonBuilder';
 import { PaginationBase, PaginationBaseEvents, PaginationBaseOptions } from './PaginationBase';
-import { ComponentButtonType, ComponentButtonBuilder } from './ComponentButtonBuilder';
+
+import { APIUser, Awaitable, ButtonBuilder, Interaction, InteractionType, Message, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, User } from 'discord.js';
+import ms from 'ms';
 
 export interface ButtonPaginationOptions extends PaginationBaseOptions {
     buttons?: ComponentButtonBuilder;

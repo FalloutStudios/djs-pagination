@@ -1,5 +1,6 @@
-import { ActionRowBuilder, AnyComponentBuilder, APIButtonComponent, ButtonBuilder, ButtonStyle, MessageActionRowComponentBuilder } from 'discord.js';
 import { ComponentBuilderBase, ComponentBuilderBaseOptions } from './ComponentBuilderBase';
+
+import { ActionRowBuilder, APIButtonComponent, ButtonBuilder, ButtonStyle, MessageActionRowComponentBuilder } from 'discord.js';
 
 export interface ComponentButton {
     customId: string;

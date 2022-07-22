@@ -1,6 +1,7 @@
-import { Awaitable, CollectedInteraction, CommandInteraction, EmbedBuilder, If, Interaction, InteractionCollector, InteractionResponseFields, MappedInteractionTypes, Message, MessageCollector, MessageComponentCollectorOptions, MessageComponentInteraction, MessageComponentType, ModalSubmitInteraction } from 'discord.js';
-import EventEmitter from 'events';
 import { OnDisableAction, Page, RepliableInteraction } from '../types/pagination';
+
+import { Awaitable, EmbedBuilder, InteractionCollector, MappedInteractionTypes, Message, MessageComponentInteraction, MessageComponentType } from 'discord.js';
+import EventEmitter from 'events';
 
 export interface PaginationBaseOptions {
     pages?: Page[];
