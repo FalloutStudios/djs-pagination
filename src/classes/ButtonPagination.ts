@@ -138,7 +138,7 @@ export class ButtonPagination extends PaginationBase {
         this.authorId = this.authorId ?? this._getAuthor(command).id;
         
         const page = this.getPage(0);
-        if (this.pages.length < 1 && this.singlePageNoButtons) page.components = [];
+        if (this.pages.length == 1 && this.singlePageNoButtons) page.components = [];
 
         switch (sendAs) {
             case SendAs.EditMessage:
@@ -166,7 +166,7 @@ export class ButtonPagination extends PaginationBase {
         }
 
         this.emit('ready');
-        if (this.pages.length > 0 || this.pages.length < 1 && !this.singlePageNoButtons) this._addCollector();
+        if (this.pages.length > 1 || this.pages.length == 1 && !this.singlePageNoButtons) this._addCollector();
 
         return this as ButtonPagination;
     }
