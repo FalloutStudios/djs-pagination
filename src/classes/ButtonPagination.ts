@@ -131,6 +131,7 @@ export class ButtonPagination extends PaginationBase {
      */
     public async paginate(command: Message|Interaction, sendAs: SendAs = SendAs.ReplyMessage): Promise<ButtonPagination> {
         if (!command) throw new TypeError("Command is invalid");
+        if (!command.channel) throw new Error("Command does not have a text channel");
         if (this.command || this.pagination) throw new TypeError("Pagination is already started");
         if (!(command instanceof Message) && command.type !== InteractionType.ModalSubmit && command.type !== InteractionType.MessageComponent && command.type !== InteractionType.ApplicationCommand) throw new TypeError("Interaction is not repliable");
         
