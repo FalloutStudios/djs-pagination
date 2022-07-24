@@ -1,10 +1,10 @@
-import { OnDisableAction, Page, RepliableInteraction } from '../types/pagination';
+import { OnDisableAction, Page, PageResolvable, RepliableInteraction } from '../types/pagination';
 
 import { Awaitable, EmbedBuilder, InteractionCollector, MappedInteractionTypes, Message, MessageComponentInteraction, MessageComponentType } from 'discord.js';
 import EventEmitter from 'events';
 
 export interface PaginationBaseOptions {
-    pages?: Page[];
+    pages?: PageResolvable[];
 }
 
 export interface PaginationBaseEvents {
@@ -42,7 +42,7 @@ export class PaginationBase extends EventEmitter {
     constructor(options?: PaginationBaseOptions) {
         super();
 
-        this.pages = options?.pages ?? [];
+        this.pages = options?.pages ? this._parsePages(...options.pages) : [];
     }
 
     /**
@@ -55,20 +55,9 @@ export class PaginationBase extends EventEmitter {
     /**
      * Add pages to pagination 
      */
-    public addPages(...pages: (Page|EmbedBuilder|string)[]) {
+    public addPages(...pages: PageResolvable[]) {
         if (!pages.length) return this;
-        
-        for (const page of pages) {
-            if (typeof page === 'string') {
-                this.pages.push({ content: page });
-            } else if (page instanceof EmbedBuilder) {
-                this.pages.push({ embeds: [page] });
-            } else if (typeof page === 'object' && !Array.isArray(page)) {
-                this.pages.push(page);
-            } else {
-                throw new TypeError('Invalid page given');
-            }
-        }
+        this.pages.push(...this._parsePages(...pages));
 
         return this;
     }
@@ -76,10 +65,31 @@ export class PaginationBase extends EventEmitter {
     /**
      * Clear existing pages and add new pages to pagination 
      */
-    public setPages(...pages: (Page|EmbedBuilder|string)[]) {
+    public setPages(...pages: PageResolvable[]) {
         this.pages = [];
         this.addPages(...pages);
         
         return this;
+    }
+
+    /**
+     * 
+     */
+    protected _parsePages(...pages: PageResolvable[]) {
+        const newPages = [];
+
+        for (const page of pages) {
+            if (typeof page === 'string') {
+                newPages.push({ content: page });
+            } else if (page instanceof EmbedBuilder) {
+                newPages.push({ embeds: [page] });
+            } else if (typeof page === 'object' && !Array.isArray(page)) {
+                newPages.push(page);
+            } else {
+                throw new TypeError('Invalid page given');
+            }
+        }
+
+        return newPages;
     }
 }

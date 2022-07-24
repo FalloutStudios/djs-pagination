@@ -89,6 +89,11 @@ const pagination = new ButtonPagination({
         .addButton(new ButtonBuilder().setCustomId('stop').setLabel('Stop').setStyle(ButtonStyle.Danger), PaginationButtonType.StopInteraction)
         .addButton(new ButtonBuilder().setCustomId('next').setLabel('Next').setStyle(ButtonStyle.Primary), PaginationButtonType.NextPage)
         .addButton(new ButtonBuilder().setCustomId('last').setLabel('Last').setStyle(ButtonStyle.Secondary), PaginationButtonType.LastPage),
+    pages: [
+        new EmbedBuilder().setTitle('Page Embed'),
+        'String page',
+        { embeds: [new EmbedBuilder().setTitle('Multiple Embed'), new EmbedBuilder().setTitle('Multiple Embed')] }
+    ],
     onDisable: OnDisableAction.DeleteComponents,
     authorIndependent: true,
     singlePageNoButtons: true,
@@ -109,6 +114,11 @@ const pagination = new ButtonPagination({
         .addButton(new ButtonBuilder().setCustomId('stop').setLabel('Stop').setStyle(ButtonStyle.Danger), PaginationButtonType.StopInteraction)
         .addButton(new ButtonBuilder().setCustomId('next').setLabel('Next').setStyle(ButtonStyle.Primary), PaginationButtonType.NextPage)
         .addButton(new ButtonBuilder().setCustomId('last').setLabel('Last').setStyle(ButtonStyle.Secondary), PaginationButtonType.LastPage),
+    pages: [
+        new EmbedBuilder().setTitle('Page Embed'),
+        'String page',
+        { embeds: [new EmbedBuilder().setTitle('Multiple Embed'), new EmbedBuilder().setTitle('Multiple Embed')] }
+    ],
     onDisable: OnDisableAction.DeleteComponents,
     authorIndependent: true,
     singlePageNoButtons: true,

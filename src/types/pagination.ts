@@ -1,5 +1,7 @@
 import { APIEmbed, CommandInteraction, EmbedBuilder, MessageComponentInteraction, MessageOptions, ModalSubmitInteraction, StickerResolvable } from 'discord.js';
 
+export type PageResolvable = Page|EmbedBuilder|string;
+
 export interface Page {
     tss?: boolean;
     content?: string;
