@@ -2,7 +2,7 @@ import { OnDisableAction, Page, PageWithComponents, RepliableInteraction, SendAs
 import { ComponentButtonBuilder, PaginationButtonType } from './ComponentButtonBuilder';
 import { PaginationBase, PaginationBaseEvents, PaginationBaseOptions } from './PaginationBase';
 
-import { APIUser, Awaitable, ButtonBuilder, Interaction, InteractionType, Message, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, User } from 'discord.js';
+import { APIUser, Awaitable, ButtonBuilder, CommandInteraction, Interaction, InteractionType, Message, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, User } from 'discord.js';
 import ms from 'ms';
 
 export interface ButtonPaginationOptions extends PaginationBaseOptions {
@@ -147,7 +147,7 @@ export class ButtonPagination extends PaginationBase {
                     if (!command.editable) throw new Error("Can't edit message command");
                     this.pagination = await command.edit(page);
                 } else {
-                    if (!command.replied || !command.deferred) throw new Error("Command interaction is not replied or deffered");
+                    if (!command.replied && !command.deferred) throw new Error("Command interaction is not replied or deffered");
                     this.pagination = await command.editReply(page);
                 }
                 break;
@@ -184,7 +184,14 @@ export class ButtonPagination extends PaginationBase {
         const page = this.getPage(index, componentsOptions?.disableComponents);
         if (componentsOptions?.removeComponents) page.components = [];
 
-        this.pagination.edit(page);
+        if (!(this.command as CommandInteraction)?.ephemeral) {
+            this.pagination.edit(page);
+        } else if ((this.command as CommandInteraction)?.ephemeral && this.pagination.interaction) {
+            (this.command as CommandInteraction).editReply(page);
+        } else {
+            throw new Error('Can\'t identify command type.');
+        }
+            
         this.currentPage = index;
 
         return page;
