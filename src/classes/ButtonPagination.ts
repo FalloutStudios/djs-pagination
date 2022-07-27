@@ -184,9 +184,9 @@ export class ButtonPagination extends PaginationBase {
         const page = this.getPage(index, componentsOptions?.disableComponents);
         if (componentsOptions?.removeComponents) page.components = [];
 
-        if (!(this.command as CommandInteraction)?.ephemeral) {
+        if (!(this.command as CommandInteraction)?.deferred) {
             this.pagination.edit(page);
-        } else if ((this.command as CommandInteraction)?.ephemeral && this.pagination.interaction) {
+        } else if ((this.command as CommandInteraction)?.deferred && this.pagination.interaction) {
             (this.command as CommandInteraction).editReply(page);
         } else {
             throw new Error('Can\'t identify command type.');
