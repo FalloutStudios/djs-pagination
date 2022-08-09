@@ -10,6 +10,10 @@ export interface Page {
     attachments?: MessageOptions["attachments"];
     files?: MessageOptions["files"];
     stickers?: StickerResolvable[];
+    /**
+     * Applicable for interaction based pagination
+     */
+    ephemeral?: boolean;
 }
 
 export interface PageWithComponents extends Page {

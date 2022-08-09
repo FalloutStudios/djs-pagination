@@ -1,6 +1,6 @@
 import { ComponentBuilderBase, ComponentBuilderBaseOptions } from '../base/ComponentBuilderBase';
 
-import { ActionRowBuilder, APIButtonComponent, ButtonBuilder, ButtonStyle, MessageActionRowComponentBuilder } from 'discord.js';
+import { ActionRowBuilder, APIButtonComponent, ButtonBuilder, ButtonStyle, MessageActionRowComponentBuilder, normalizeArray, RestOrArray } from 'discord.js';
 
 export interface ComponentButton {
     customId: string;
@@ -53,8 +53,8 @@ export class ComponentButtonBuilder extends ComponentBuilderBase {
         return this;
     }
 
-    public setButtons(buttons: SetButtonOption[]): ComponentButtonBuilder {
-        for (const button of buttons) {
+    public setButtons(...buttons: RestOrArray<SetButtonOption>): ComponentButtonBuilder {
+        for (const button of normalizeArray(buttons)) {
             this.addButton(button.button, button.type);
         }
         
