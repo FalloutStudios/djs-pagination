@@ -1,4 +1,4 @@
-import { ComponentBuilderBase, ComponentBuilderBaseOptions } from './ComponentBuilderBase';
+import { ComponentBuilderBase, ComponentBuilderBaseOptions } from '../base/ComponentBuilderBase';
 
 import { ActionRowBuilder, APIButtonComponent, ButtonBuilder, ButtonStyle, MessageActionRowComponentBuilder } from 'discord.js';
 

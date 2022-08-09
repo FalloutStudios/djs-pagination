@@ -1,6 +1,6 @@
-import { OnDisableAction, Page, PageResolvable, RepliableInteraction } from '../types/pagination';
+import { OnDisableAction, Page, PageResolvable, RepliableInteraction } from '../../types/pagination';
 
-import { Awaitable, EmbedBuilder, InteractionCollector, MappedInteractionTypes, Message, MessageComponentInteraction, MessageComponentType } from 'discord.js';
+import { Awaitable, EmbedBuilder, InteractionCollector, MappedInteractionTypes, Message, MessageComponentInteraction, MessageComponentType, normalizeArray, RestOrArray } from 'discord.js';
 import EventEmitter from 'events';
 
 export interface PaginationBaseOptions {
@@ -55,9 +55,9 @@ export class PaginationBase extends EventEmitter {
     /**
      * Add pages to pagination 
      */
-    public addPages(...pages: PageResolvable[]) {
+    public addPages(...pages: RestOrArray<PageResolvable>) {
         if (!pages.length) return this;
-        this.pages.push(...this._parsePages(...pages));
+        this.pages.push(...this._parsePages(normalizeArray(pages)));
 
         return this;
     }
@@ -65,7 +65,7 @@ export class PaginationBase extends EventEmitter {
     /**
      * Clear existing pages and add new pages to pagination 
      */
-    public setPages(...pages: PageResolvable[]) {
+    public setPages(...pages: RestOrArray<PageResolvable>) {
         this.pages = [];
         this.addPages(...pages);
         
@@ -75,10 +75,10 @@ export class PaginationBase extends EventEmitter {
     /**
      * 
      */
-    protected _parsePages(...pages: PageResolvable[]) {
+    protected _parsePages(...pages: RestOrArray<PageResolvable>) {
         const newPages = [];
 
-        for (const page of pages) {
+        for (const page of normalizeArray(pages)) {
             if (typeof page === 'string') {
                 newPages.push({ content: page });
             } else if (page instanceof EmbedBuilder) {
