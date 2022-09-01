@@ -1,12 +1,12 @@
-import { OnDisableAction, Page, PageWithComponents, RepliableInteraction, SendAs } from '../types/pagination';
-import { ComponentButtonBuilder, PaginationButtonType } from './builders/ComponentButtonBuilder';
+import { OnDisableAction, Page, RepliableInteraction, SendAs } from '../types/pagination';
+import { PaginationButtonType, ButtonPaginationComponentsBuilder, ButtonPaginationComponentsBuilderOptions } from './builders/ButtonPaginationComponentsBuilder';
 import { PaginationBase, PaginationBaseEvents, PaginationBaseOptions } from './base/PaginationBase';
 
 import { APIUser, Awaitable, ButtonBuilder, CommandInteraction, Interaction, InteractionType, Message, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, User } from 'discord.js';
 import ms from 'ms';
 
 export interface ButtonPaginationOptions extends PaginationBaseOptions {
-    buttons?: ComponentButtonBuilder;
+    buttons?: ButtonPaginationComponentsBuilder|ButtonPaginationComponentsBuilderOptions;
     onDisable?: OnDisableAction;
     authorIndependent?: boolean;
     singlePageNoButtons?: boolean;
@@ -16,7 +16,7 @@ export interface ButtonPaginationOptions extends PaginationBaseOptions {
 }
 
 export interface ButtonPaginationEvents extends PaginationBaseEvents {
-    "componentInteraction": [componentType: PaginationButtonType, component: MessageComponentInteraction];
+    "interactionCreate": [componentType: Omit<PaginationButtonType, "CustomComponent">, component: MessageComponentInteraction];
 }
 
 export interface ButtonPagination extends PaginationBase {
@@ -38,7 +38,7 @@ export interface ButtonPagination extends PaginationBase {
 }
 
 export class ButtonPagination extends PaginationBase {
-    public buttons: ComponentButtonBuilder = new ComponentButtonBuilder();
+    public buttons: ButtonPaginationComponentsBuilder;
     public onDisable: OnDisableAction = OnDisableAction.DisableComponents;
     public authorIndependent: boolean = true;
     public singlePageNoButtons: boolean = true;
@@ -49,7 +49,7 @@ export class ButtonPagination extends PaginationBase {
     constructor(options?: ButtonPaginationOptions) {
         super(options);
 
-        this.buttons = options?.buttons ?? this.buttons;
+        this.buttons = options?.buttons instanceof ButtonPaginationComponentsBuilder ? options.buttons : new ButtonPaginationComponentsBuilder(options?.buttons);
         this.onDisable = options?.onDisable ?? this.onDisable;
         this.authorIndependent = options?.authorIndependent ?? this.authorIndependent;
         this.singlePageNoButtons = options?.singlePageNoButtons ?? this.singlePageNoButtons;
@@ -121,8 +121,8 @@ export class ButtonPagination extends PaginationBase {
     /**
      * Add button to pagination 
      */
-    public addButton(button: ButtonBuilder, type: PaginationButtonType): ButtonPagination {
-        this.buttons.addButton(button, type);
+    public addButton(button: ButtonBuilder, type: Omit<PaginationButtonType, "CustomComponent">): ButtonPagination {
+        this.buttons.addMessageComponent(button, type);
         return this;
     }
 
@@ -197,11 +197,11 @@ export class ButtonPagination extends PaginationBase {
         return page;
     }
     
-    public getPage(index: number, disableComponents?: boolean): PageWithComponents {
-        const page: PageWithComponents|undefined = super.getPage(index);
+    public getPage(index: number, disabledComponents?: boolean): Page {
+        const page = super.getPage(index);
         if (!page) throw new Error(`Can\'t find page with index ${index}`);
 
-        if (this.buttons.buttons.length) page.components = [this.buttons.getActionRow(disableComponents)];
+        if (this.buttons.buttons.length) page.components = [...(page.components ?? []), ...this.buttons.getPaginationActionRows(0, disabledComponents)];
 
         return page;
     }
@@ -223,11 +223,18 @@ export class ButtonPagination extends PaginationBase {
         return options;
     }
 
+    /**
+     * Clone pagination
+     */
+    public clonePagination(includePages: boolean = true): ButtonPagination {
+        return new ButtonPagination(this.makeOptions(includePages));
+    }
+
     private _addCollector(): void {
         if (!this.command || !this.pagination) throw new TypeError("Pagination is not yet ready");
 
         this.collector = this.pagination.createMessageComponentCollector({
-            filter: c => Object.values(this.buttons.componentButtons).some(b => c.customId == b.customId),
+            filter: c => Object.values(this.buttons.buttons).some(b => c.customId == b.customId),
             time: this.timer,
             ...this.collectorOptions
         });
@@ -242,7 +249,7 @@ export class ButtonPagination extends PaginationBase {
                 return;
             }
 
-            const action = this.buttons.componentButtons.find(b => b.customId == c.customId);
+            const action = this.buttons.buttons.find(b => b.customId == c.customId);
             if (!action) {
                 if (!c.deferred) c.deferUpdate().catch(() => null);
                 return;
@@ -267,7 +274,7 @@ export class ButtonPagination extends PaginationBase {
             }
 
             this.collector?.resetTimer();
-            this.emit("componentInteraction", action.type, c);
+            this.emit("interactionCreate", action.type, c);
             if (!c.deferred) c.deferUpdate().catch(() => null);
         });
 

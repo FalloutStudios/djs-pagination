@@ -14,9 +14,6 @@ export interface Page {
      * Applicable for interaction based pagination
      */
     ephemeral?: boolean;
-}
-
-export interface PageWithComponents extends Page {
     components?: MessageOptions["components"];
 }
 
