@@ -70,12 +70,17 @@ export class ButtonPaginationComponentsBuilder extends ComponentsBuilderBase {
         return this;
     }
 
-    public getActionRow(disabledComponents?: boolean): ActionRowBuilder<MessageActionRowComponentBuilder> {
-        return super.getActionRow().addComponents(this.buttons.map(b => b.button.setDisabled(disabledComponents)));
+    public getActionRow(disabledComponents: boolean = false): ActionRowBuilder<MessageActionRowComponentBuilder> {
+        return super.getActionRow().setComponents(this.buttons.map(b => b.button.setDisabled(disabledComponents)));
     }
 
-    public getPaginationActionRows(paginationComponentIndex?: number, disabledComponents?: boolean): ActionRowBuilder<MessageActionRowComponentBuilder>[] {
-        return super.getPaginationActionRows(paginationComponentIndex).map(actionRow => {
+    public getPaginationActionRows(paginationComponentIndex: number = 0, disabledComponents: boolean = false): ActionRowBuilder<MessageActionRowComponentBuilder>[] {
+        if (!this.actionRows.length) return [this.getActionRow(disabledComponents)];
+
+        const actionRows = this.actionRows;
+        actionRows.splice(paginationComponentIndex, 0, this._paginationActionRow);
+
+        return actionRows.map(actionRow => {
             const components = (actionRow.data.components as (APIButtonComponentWithCustomId|APISelectMenuComponent)[])?.map(component => {
                 if (component.disabled === undefined && disabledComponents) component.disabled = true;
 
