@@ -17,6 +17,33 @@ export interface Page {
     components?: MessageOptions["components"];
 }
 
+export enum PaginationControllerType {
+    /**
+     * First page controller
+     */
+    FirstPage,
+    /**
+     * Previous page controller
+     */
+    PreviousPage,
+    /**
+     * Next page controller
+     */
+    StopInteraction,
+    /**
+     * Next page controller
+     */
+    NextPage,
+    /**
+     * Last page controller
+     */
+    LastPage,
+    /**
+     * Custom
+     */
+    Custom
+}
+
 export enum SendAs {
     /**
      * Send the pagination as new message of the same channel as the parent message

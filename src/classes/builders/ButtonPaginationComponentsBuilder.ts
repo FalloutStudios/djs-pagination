@@ -1,37 +1,11 @@
-import { ActionRowBuilder, APIButtonComponentWithCustomId, APISelectMenuComponent, ButtonBuilder, ButtonStyle, MessageActionRowComponentBuilder, normalizeArray, RestOrArray, SelectMenuBuilder } from 'discord.js';
+import { ActionRowBuilder, APIButtonComponentWithCustomId, APISelectMenuComponent, ButtonBuilder, ButtonStyle, MessageActionRowComponentBuilder } from 'discord.js';
 import { ComponentsBuilderBase, ComponentsBuilderBaseOptions } from '../base/ComponentsBuilderBase';
+import { PaginationControllerType } from '../../types/pagination';
 
 export interface PaginationButton {
     button: ButtonBuilder;
     customId: string;
-    type: Omit<PaginationButtonType, "CustomButton">;
-}
-
-export enum PaginationButtonType {
-    /**
-     * First page button
-     */
-    FirstPage,
-    /**
-     * Previous page button
-     */
-    PreviousPage,
-    /**
-     * Next page button
-     */
-    StopInteraction,
-    /**
-     * Next page button
-     */
-    NextPage,
-    /**
-     * Last page button
-     */
-    LastPage,
-    /**
-     * Custom button
-     */
-    CustomComponent
+    type: Omit<PaginationControllerType, "CustomButton">;
 }
 
 export interface ButtonPaginationComponentsBuilderOptions extends ComponentsBuilderBaseOptions{
@@ -50,9 +24,9 @@ export class ButtonPaginationComponentsBuilder extends ComponentsBuilderBase {
     /**
      * Add component to pagination action row
      */
-    public addMessageComponent(component: ButtonBuilder, type: Omit<PaginationButtonType, "CustomComponent">): this;
-    public addMessageComponent(component: MessageActionRowComponentBuilder, type: PaginationButtonType): this {
-        if (type == PaginationButtonType.CustomComponent) {
+    public addMessageComponent(component: ButtonBuilder, type: Omit<PaginationControllerType, "Custom">): this;
+    public addMessageComponent(component: MessageActionRowComponentBuilder, type: PaginationControllerType): this {
+        if (type == PaginationControllerType.Custom) {
             this._paginationActionRow.addComponents(component);
             return this;
         }

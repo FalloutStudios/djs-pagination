@@ -33,49 +33,45 @@ export interface PaginationBase extends EventEmitter {
 }
 
 export class PaginationBase extends EventEmitter {
-    public pages: Page[] = [];
-    public currentPage: number = 0;
-    public pagination?: Message;
-    public command?: Message|RepliableInteraction;
-    public collector?: InteractionCollector<MappedInteractionTypes[MessageComponentType]>;
+    protected _pages: Page[] = [];
+    protected _currentPage: number = 0;
+    protected _pagination?: Message;
+    protected _command?: Message|RepliableInteraction;
+
+    get pages() { return this._pages; }
+    get currentPage() { return this._currentPage; }
+    get pagination() { return this._pagination; }
+    get command() { return this._command; }
+
+    set pages(pages: PageResolvable[]) { this._pages = this._parsePages(pages); }
 
     constructor(options?: PaginationBaseOptions) {
         super();
 
-        this.pages = options?.pages ? this._parsePages(...options.pages) : [];
+        this._pages = options?.pages ? this._parsePages(...options.pages) : [];
     }
 
     /**
      * Get page data 
      */
     public getPage(pageIndex: number): Page|undefined {
-        return this.pages[pageIndex];
+        return this._pages[pageIndex];
     }
 
     /**
      * Add pages to pagination 
      */
-    public addPages(...pages: RestOrArray<PageResolvable>) {
+    public addPages(...pages: RestOrArray<PageResolvable>): this {
         if (!pages.length) return this;
-        this.pages.push(...this._parsePages(normalizeArray(pages)));
+        this._pages.push(...this._parsePages(normalizeArray(pages)));
 
-        return this;
-    }
-
-    /**
-     * Clear existing pages and add new pages to pagination 
-     */
-    public setPages(...pages: RestOrArray<PageResolvable>) {
-        this.pages = [];
-        this.addPages(...pages);
-        
         return this;
     }
 
     /**
      * 
      */
-    protected _parsePages(...pages: RestOrArray<PageResolvable>) {
+    protected _parsePages(...pages: RestOrArray<PageResolvable>): Page[] {
         const newPages = [];
 
         for (const page of normalizeArray(pages)) {
