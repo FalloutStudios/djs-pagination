@@ -234,7 +234,7 @@ export class ButtonPagination extends PaginationBase {
         return new ButtonPagination(this.makeOptions(includePages));
     }
 
-    private _addCollector(): void {
+    protected _addCollector(): void {
         if (!this.command || !this.pagination) throw new TypeError("Pagination is not yet ready");
 
         this.collector = this.pagination.createMessageComponentCollector({
@@ -299,7 +299,7 @@ export class ButtonPagination extends PaginationBase {
         });
     }
 
-    private _getAuthor(command: RepliableInteraction|Message): User {
+    protected _getAuthor(command: RepliableInteraction|Message): User {
         if (command instanceof Message) return command.author;
         return command.user;
     }
