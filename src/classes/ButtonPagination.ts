@@ -200,8 +200,14 @@ export class ButtonPagination extends PaginationBase {
     public getPage(index: number, disabledComponents: boolean = false): Page {
         const page = super.getPage(index);
         if (!page) throw new Error(`Can\'t find page with index ${index}`);
-        if (this.buttons.buttons.length) page.components = this.buttons.getPaginationActionRows(0, disabledComponents);
-        return page;
+
+        return {
+            ...page,
+            components: [
+                ...this.buttons.getPaginationActionRows(0, disabledComponents),
+                ...(page.components ?? [])
+            ]
+        };
     }
 
     /**
