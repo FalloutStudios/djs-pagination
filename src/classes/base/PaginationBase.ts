@@ -1,4 +1,4 @@
-import { OnDisableAction, Page, PageResolvable, RepliableInteraction } from '../../types/pagination';
+import { Page, PageResolvable, RepliableInteraction } from '../../types/pagination';
 
 import { Awaitable, EmbedBuilder, InteractionCollector, MappedInteractionTypes, Message, MessageComponentInteraction, MessageComponentType, normalizeArray, RestOrArray } from 'discord.js';
 import EventEmitter from 'events';
@@ -11,7 +11,7 @@ export interface PaginationBaseEvents {
     "ready": [];
     "pageChange": [page: Page, index: number];
     "collectorCollect": [interaction: MessageComponentInteraction];
-    "collectorEnd": [reason: string, disableAction: OnDisableAction];
+    "collectorEnd": [reason: string];
 }
 
 export interface PaginationBase extends EventEmitter {
