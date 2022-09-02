@@ -1,9 +1,7 @@
 import { OnDisableAction, Page, RepliableInteraction, SendAs } from '../types/pagination';
+import { APIUser, Awaitable, ButtonBuilder, CommandInteraction, Interaction, InteractionType, Message, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, User } from 'discord.js';
 import { PaginationButtonType, ButtonPaginationComponentsBuilder, ButtonPaginationComponentsBuilderOptions } from './builders/ButtonPaginationComponentsBuilder';
 import { PaginationBase, PaginationBaseEvents, PaginationBaseOptions } from './base/PaginationBase';
-
-import { APIUser, Awaitable, ButtonBuilder, CommandInteraction, Interaction, InteractionType, Message, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, User } from 'discord.js';
-import ms from 'ms';
 
 export interface ButtonPaginationOptions extends PaginationBaseOptions {
     buttons?: ButtonPaginationComponentsBuilder|ButtonPaginationComponentsBuilderOptions;
@@ -11,7 +9,7 @@ export interface ButtonPaginationOptions extends PaginationBaseOptions {
     authorIndependent?: boolean;
     singlePageNoButtons?: boolean;
     timer?: number;
-    authorId?: string;
+    authorId?: string|User|APIUser;
     collectorOptions?: MessageCollectorOptionsParams<MessageComponentType>;
 }
 
@@ -50,29 +48,21 @@ export class ButtonPagination extends PaginationBase {
         super(options);
 
         this.buttons = options?.buttons instanceof ButtonPaginationComponentsBuilder ? options.buttons : new ButtonPaginationComponentsBuilder(options?.buttons);
-        this.onDisable = options?.onDisable ?? this.onDisable;
-        this.authorIndependent = options?.authorIndependent ?? this.authorIndependent;
-        this.singlePageNoButtons = options?.singlePageNoButtons ?? this.singlePageNoButtons;
-        this.timer = options?.timer ?? this.timer;
-        this.authorId = options?.authorId ?? this.authorId;
         this.collectorOptions = options?.collectorOptions ?? this.collectorOptions;
+
+        if (options?.onDisable) this.setOnDisableAction(options.onDisable);
+        if (options?.authorIndependent) this.setAuthorIndependent(options.authorIndependent);
+        if (options?.singlePageNoButtons) this.setAuthorIndependent(options.singlePageNoButtons);
+        if (options?.timer) this.setTimer(options.timer);
+        if (options?.authorId) this.setAuthorId(options?.authorId);
     }
 
     /**
      *  Sets disable interaction interval in milliseconds
+     * @default 20000
      */
-    public setTimer(timer: number): ButtonPagination;
-    /**
-     * Sets disable interaction interval, eg:
-     * - 10s
-     * - 20m
-     */
-    public setTimer(timer: string): ButtonPagination;
-    public setTimer(timer: number|string): ButtonPagination {
-        if (typeof timer == 'string') {
-            this.timer = ms(timer);
-            if (this.timer == undefined) throw new TypeError('Invalid timer');
-        } else if (!isNaN(Number(timer))) {
+    public setTimer(timer: number): ButtonPagination {
+        if (!isNaN(Number(timer))) {
             this.timer = timer;
         } else {
             throw new TypeError('Invalid ttimer');
@@ -83,6 +73,7 @@ export class ButtonPagination extends PaginationBase {
 
     /**
      * Set if the pagination should only work for pagination author 
+     * @default true
      */
     public setAuthorIndependent(authorIndependent: boolean): ButtonPagination {
         this.authorIndependent = authorIndependent;
@@ -90,7 +81,8 @@ export class ButtonPagination extends PaginationBase {
     }
 
     /**
-     * Set what action would happen on pagination timeout 
+     * Set what action would happen on pagination timeout
+     * @default OnDisableAction.DisableComponents
      */
     public setOnDisableAction(action: OnDisableAction): ButtonPagination {
         this.onDisable = action;
@@ -99,6 +91,7 @@ export class ButtonPagination extends PaginationBase {
 
     /**
      * Set if pagination should disable buttons if there's only single page 
+     * @default true
      */
     public setSinglePageNoButtons(singlePageNoButtons: boolean): ButtonPagination {
         this.singlePageNoButtons = singlePageNoButtons;
@@ -106,7 +99,7 @@ export class ButtonPagination extends PaginationBase {
     }
 
     /**
-     * Sets the pagination author Id 
+     * Sets the pagination author Id
      */
     public setAuthorId(authorId: string|User|APIUser): ButtonPagination {
         if (typeof authorId == 'string') {
