@@ -75,8 +75,5 @@ typings/
 # FuseBox cache
 .fusebox/
 
-# Test directory
-test
-
 # Compiled Javascripts
 dist
