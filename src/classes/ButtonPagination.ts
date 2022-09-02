@@ -3,7 +3,7 @@ import { PaginationButtonType, ButtonPaginationComponentsBuilder, ButtonPaginati
 import { PaginationBase, PaginationBaseEvents, PaginationBaseOptions } from './base/PaginationBase';
 import { Page, RepliableInteraction, SendAs } from '../types/pagination';
 
-export enum ButtonPaginationDisableAction {
+export enum ButtonPaginationOnDisableAction {
     /**
      * Do nothing but will disable interacting with the pagination. 
      */
@@ -24,7 +24,7 @@ export enum ButtonPaginationDisableAction {
 
 export interface ButtonPaginationOptions extends PaginationBaseOptions {
     buttons?: ButtonPaginationComponentsBuilder|ButtonPaginationComponentsBuilderOptions;
-    onDisableAction?: ButtonPaginationDisableAction|keyof typeof ButtonPaginationDisableAction;
+    onDisableAction?: ButtonPaginationOnDisableAction|keyof typeof ButtonPaginationOnDisableAction;
     authorIndependent?: boolean;
     singlePageNoButtons?: boolean;
     timer?: number;
@@ -56,7 +56,7 @@ export interface ButtonPagination extends PaginationBase {
 
 export class ButtonPagination extends PaginationBase {
     protected _buttons!: ButtonPaginationComponentsBuilder;
-    protected _onDisableAction: ButtonPaginationDisableAction = ButtonPaginationDisableAction.DisableComponents;
+    protected _onDisableAction: ButtonPaginationOnDisableAction = ButtonPaginationOnDisableAction.DisableComponents;
     protected _authorIndependent: boolean = true;
     protected _singlePageNoButtons: boolean = true;
     protected _timer: number = 20000;
@@ -116,10 +116,10 @@ export class ButtonPagination extends PaginationBase {
 
     /**
      * Set what action would happen on pagination timeout
-     * @default ButtonPaginationDisableAction.DisableComponents
+     * @default ButtonPaginationOnDisableAction.DisableComponents
      */
-    public setOnDisableAction(action: ButtonPaginationDisableAction|keyof typeof ButtonPaginationDisableAction): ButtonPagination {
-        this._onDisableAction = typeof action === 'string' ? ButtonPaginationDisableAction[action] : action;
+    public setOnDisableAction(action: ButtonPaginationOnDisableAction|keyof typeof ButtonPaginationOnDisableAction): ButtonPagination {
+        this._onDisableAction = typeof action === 'string' ? ButtonPaginationOnDisableAction[action] : action;
         return this;
     }
 
@@ -313,13 +313,13 @@ export class ButtonPagination extends PaginationBase {
 
         this.collector.on("end", (c, reason) => {
             switch (this._onDisableAction) {
-                case ButtonPaginationDisableAction.DeleteComponents:
+                case ButtonPaginationOnDisableAction.DeleteComponents:
                     this.setCurrentPage(this.currentPage, { removeComponents: true });
                     break;
-                case ButtonPaginationDisableAction.DeleteMessage:
+                case ButtonPaginationOnDisableAction.DeleteMessage:
                     if (this.pagination?.deletable) this.pagination.delete();
                     break;
-                case ButtonPaginationDisableAction.DisableComponents:
+                case ButtonPaginationOnDisableAction.DisableComponents:
                     this.setCurrentPage(this.currentPage, { disableComponents: true });
                     break;
             }
