@@ -1,4 +1,4 @@
-import { APIEmbed, CommandInteraction, EmbedBuilder, MessageComponentInteraction, MessageOptions, ModalSubmitInteraction, StickerResolvable } from 'discord.js';
+import { APIEmbed, EmbedBuilder, Interaction, InteractionResponseFields, MessageOptions, StickerResolvable } from 'discord.js';
 
 export type PageResolvable = Page|EmbedBuilder|string;
 
@@ -14,29 +14,34 @@ export interface Page {
      * Applicable for interaction based pagination
      */
     ephemeral?: boolean;
-}
-
-export interface PageWithComponents extends Page {
     components?: MessageOptions["components"];
 }
 
-export enum OnDisableAction {
+export enum PaginationControllerType {
     /**
-     * Do nothing but will disable interacting with the pagination. 
+     * First page controller
      */
-    None,
+    FirstPage,
     /**
-     * Delete the pagination message
+     * Previous page controller
      */
-    DeleteMessage,
+    PreviousPage,
     /**
-     * Delete the pagination components
+     * Next page controller
      */
-    DeleteComponents,
+    StopInteraction,
     /**
-     * Disable the pagination components
+     * Next page controller
      */
-    DisableComponents
+    NextPage,
+    /**
+     * Last page controller
+     */
+    LastPage,
+    /**
+     * Custom
+     */
+    Custom
 }
 
 export enum SendAs {
@@ -54,4 +59,4 @@ export enum SendAs {
     ReplyMessage
 }
 
-export type RepliableInteraction = CommandInteraction|MessageComponentInteraction|ModalSubmitInteraction;
+export type RepliableInteraction = Interaction & InteractionResponseFields;
