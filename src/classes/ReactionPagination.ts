@@ -261,8 +261,8 @@ export class ReactionPagination extends PaginationBase<MessageReaction> {
             r = r.partial ? await r.fetch().catch(() => null as any) : r;
             if (!r) return;
 
-            if (!r.me && this._authorIndependent && this._authorId && u.id !== this._authorId) {
-                r.users.remove(u).catch(() => {});
+            if (this._authorIndependent && this._authorId && u.id !== this._authorId) {
+                if (u.id !== this._pagination?.client.user?.id) r.users.remove(u).catch(() => {});
                 return;
             }
 
