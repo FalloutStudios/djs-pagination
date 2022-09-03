@@ -1,8 +1,8 @@
-const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ButtonBuilder } = require('discord.js');
 const { RecipleScript, MessageCommandBuilder, SlashCommandBuilder } = require('reciple');
-const { ButtonPagination, PaginationControllerType, ReactionPagination, SendAs, ButtonPaginationOnDisableAction } = require('../../dist/');
+const { ButtonPagination } = require('../../dist');
 
-const options = new ReactionPagination()
+const options = new ButtonPagination()
     .addPages(
         { embeds: [{ title: 'Page 1' }] },
         { embeds: [{ title: 'Page 2' }] },
@@ -10,14 +10,12 @@ const options = new ReactionPagination()
         { embeds: [{ title: 'Page 4' }] },
         { embeds: [{ title: 'Page 5' }] },
     )
-    .setOnDisableAction('ClearAllReactions')
-    .addReaction('⬅️', 'PreviousPage')
-    .addReaction('➡️', 'NextPage')
-    .addReaction('⛔', 'StopInteraction')
-    .addReaction('⏪', 'FirstPage')
-    .addReaction('⏩', 'LastPage');
-
-console.log(options);
+    .setOnDisableAction('DeleteComponents')
+    .addButton(new ButtonBuilder().setCustomId('FirstPage').setEmoji('⏪'), 'FirstPage')
+    .addButton(new ButtonBuilder().setCustomId('PrevPage').setEmoji('⬅️'), 'PreviousPage')
+    .addButton(new ButtonBuilder().setCustomId('StopInteraction').setEmoji('⛔'), 'StopInteraction')
+    .addButton(new ButtonBuilder().setCustomId('NextPage').setEmoji('➡️'), 'NextPage')
+    .addButton(new ButtonBuilder().setCustomId('LastPage').setEmoji('⏩'), 'LastPage');
 
 /**
  * @implements {RecipleScript}
@@ -27,30 +25,27 @@ class Test {
         this.versions = '5.x.x';
         this.commands = [
             new MessageCommandBuilder()
-                .setName('test')
+                .setName('button-pagination')
                 .setDescription('Test command')
                 .setExecute(command => {
                     const pagination = options.clonePagination();
 
                     pagination.on('ready', () => console.log('Ready!'));
                     pagination.on('collectorEnd', () => console.log('End!'));
-                    pagination.on('reactionAdd', (type, button) => console.log(type, button.customId));
 
                     pagination.paginate(command.message);
                 }),
             new SlashCommandBuilder()
-                .setName('test')
+                .setName('button-pagination')
                 .setDescription('Test command')
                 .setExecute(async command => {
                     const pagination = options.clonePagination();
 
                     pagination.on('ready', () => console.log('Ready!'));
                     pagination.on('collectorEnd', () => console.log('End!'));
-                    pagination.on('reactionAdd', (type, button) => console.log(type, button));
 
-                    pagination.pages = pagination.pages.map(p => ({ ...p, ephemeral: true }));
-
-                    pagination.paginate(command.interaction, SendAs.ReplyMessage);
+                    pagination.pages = pagination.pages.map(e => ({ ...e, ephemeral: true }));
+                    pagination.paginate(command.interaction);
                 })
         ];
     }
