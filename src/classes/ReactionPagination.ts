@@ -1,4 +1,4 @@
-import { APIUser, Awaitable, BaseGuildEmojiManager, EmojiIdentifierResolvable, EmojiResolvable, GuildEmoji, Interaction, InteractionType, Message, MessageReaction, normalizeArray, parseEmoji, ReactionCollector, ReactionCollectorOptions, resolvePartialEmoji, RestOrArray, User } from 'discord.js';
+import { APIUser, Awaitable, BaseGuildEmojiManager, EmojiIdentifierResolvable, EmojiResolvable, GuildEmoji, IntentsBitField, Interaction, InteractionType, Message, MessageReaction, normalizeArray, parseEmoji, ReactionCollector, ReactionCollectorOptions, resolvePartialEmoji, RestOrArray, User } from 'discord.js';
 import { PaginationControllerType, SendAs } from '../types/pagination';
 import { PaginationBase, PaginationBaseEvents, PaginationBaseOptions } from './base/PaginationBase';
 
@@ -194,6 +194,7 @@ export class ReactionPagination extends PaginationBase<MessageReaction> {
         if (!command.channel) throw new Error("Command does not have a text channel");
         if (this._command || this._pagination) throw new TypeError("Pagination is already started");
         if (!(command instanceof Message) && !command.isRepliable()) throw new TypeError("Interaction is not repliable");
+        if (!new IntentsBitField(command.client.options.intents).has("GuildMessageReactions")) throw new Error("Missing intent 'GuildMessageReactions'");
 
         this._command = command;
         this._authorId = this._authorId ?? this._getAuthor(command).id;
