@@ -1,4 +1,4 @@
-const { ButtonBuilder } = require('discord.js');
+const { ButtonBuilder, ButtonStyle } = require('discord.js');
 const { RecipleScript, MessageCommandBuilder, SlashCommandBuilder } = require('reciple');
 const { ButtonPagination } = require('../../dist');
 
@@ -11,11 +11,11 @@ const options = new ButtonPagination()
         { embeds: [{ title: 'Page 5' }] },
     )
     .setOnDisableAction('DeleteComponents')
-    .addButton(new ButtonBuilder().setCustomId('FirstPage').setEmoji('⏪'), 'FirstPage')
-    .addButton(new ButtonBuilder().setCustomId('PrevPage').setEmoji('⬅️'), 'PreviousPage')
-    .addButton(new ButtonBuilder().setCustomId('StopInteraction').setEmoji('⛔'), 'StopInteraction')
-    .addButton(new ButtonBuilder().setCustomId('NextPage').setEmoji('➡️'), 'NextPage')
-    .addButton(new ButtonBuilder().setCustomId('LastPage').setEmoji('⏩'), 'LastPage');
+    .addButton(new ButtonBuilder().setCustomId('FirstPage').setEmoji('⏪').setStyle(ButtonStyle.Secondary), 'FirstPage')
+    .addButton(new ButtonBuilder().setCustomId('PrevPage').setEmoji('⬅️').setStyle(ButtonStyle.Primary), 'PreviousPage')
+    .addButton(new ButtonBuilder().setCustomId('StopInteraction').setEmoji('⛔').setStyle(ButtonStyle.Danger), 'StopInteraction')
+    .addButton(new ButtonBuilder().setCustomId('NextPage').setEmoji('➡️').setStyle(ButtonStyle.Primary), 'NextPage')
+    .addButton(new ButtonBuilder().setCustomId('LastPage').setEmoji('⏩').setStyle(ButtonStyle.Secondary), 'LastPage');
 
 /**
  * @implements {RecipleScript}

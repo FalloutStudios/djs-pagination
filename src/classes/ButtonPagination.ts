@@ -256,7 +256,7 @@ export class ButtonPagination extends PaginationBase<MessageComponentInteraction
             }
 
             const action = this._buttons.buttons.find(b => b.customId == c.customId)?.type;
-            if (!action) {
+            if (action === undefined) {
                 if (!c.deferred) c.deferUpdate().catch(() => {});
                 return;
             }
