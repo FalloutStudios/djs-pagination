@@ -72,7 +72,7 @@ export class PaginationBase<Collected> extends EventEmitter {
     /**
      * Sets current page 
      */
-     public async setCurrentPage(index?: number): Promise<Page> {
+    public async setCurrentPage(index?: number): Promise<Page> {
         index = index ?? this._currentPage;
 
         if (!this._command || !this._pagination) throw new Error('Pagination is not yet ready');
@@ -93,7 +93,7 @@ export class PaginationBase<Collected> extends EventEmitter {
     }
 
     protected async _sendPage(page: Page, sendAs: SendAs): Promise<void> {
-        if (!this._command || !this._pagination) throw new TypeError("Pagination is not yet ready");
+        if (!this._command) throw new TypeError("Pagination is not yet ready");
 
         switch (sendAs) {
             case SendAs.EditMessage:

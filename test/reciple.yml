@@ -71,6 +71,7 @@ client:
     - Guilds
     - GuildMembers
     - GuildMessages
+    - GuildMessageReactions
     - MessageContent
 
 # Bot messages

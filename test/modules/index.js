@@ -1,31 +1,21 @@
 const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { RecipleScript, MessageCommandBuilder, SlashCommandBuilder } = require('reciple');
-const { ButtonPagination, PaginationControllerType, SendAs, ButtonPaginationOnDisableAction } = require('../../dist/');
+const { ButtonPagination, PaginationControllerType, ReactionPagination, SendAs, ButtonPaginationOnDisableAction } = require('../../dist/');
 
-const options = new ButtonPagination()
-    .setOnDisableAction(ButtonPaginationOnDisableAction.DisableComponents)
+const options = new ReactionPagination()
     .addPages(
-        new EmbedBuilder()
-            .setTitle('Page 1')
-            .setDescription('Description'),
-        new EmbedBuilder()
-            .setTitle('Page 2')
-            .setDescription('Description'),
-        new EmbedBuilder()
-            .setTitle('Page 3')
-            .setDescription('Description'),
-        new EmbedBuilder()
-            .setTitle('Page 4')
-            .setDescription('Description'),
-        new EmbedBuilder()
-            .setTitle('Page 5')
-            .setDescription('Description')
+        { embeds: [{ title: 'Page 1' }] },
+        { embeds: [{ title: 'Page 2' }] },
+        { embeds: [{ title: 'Page 3' }] },
+        { embeds: [{ title: 'Page 4' }] },
+        { embeds: [{ title: 'Page 5' }] },
     )
-    .addButton(new ButtonBuilder().setCustomId('first').setLabel('First').setStyle(ButtonStyle.Secondary), PaginationControllerType.FirstPage)
-    .addButton(new ButtonBuilder().setCustomId('prev').setLabel('Prev').setStyle(ButtonStyle.Primary), PaginationControllerType.PreviousPage)
-    .addButton(new ButtonBuilder().setCustomId('stop').setLabel('Stop').setStyle(ButtonStyle.Danger), PaginationControllerType.StopInteraction)
-    .addButton(new ButtonBuilder().setCustomId('next').setLabel('Next').setStyle(ButtonStyle.Primary), PaginationControllerType.NextPage)
-    .addButton(new ButtonBuilder().setCustomId('last').setLabel('Last').setStyle(ButtonStyle.Secondary), PaginationControllerType.LastPage);
+    .setOnDisableAction('ClearAllReactions')
+    .addReaction('⬅️', 'PreviousPage')
+    .addReaction('➡️', 'NextPage')
+    .addReaction('⛔', 'StopInteraction')
+    .addReaction('⏪', 'FirstPage')
+    .addReaction('⏩', 'LastPage');
 
 console.log(options);
 
@@ -44,7 +34,7 @@ class Test {
 
                     pagination.on('ready', () => console.log('Ready!'));
                     pagination.on('collectorEnd', () => console.log('End!'));
-                    pagination.on('interactionCreate', (type, button) => console.log(type, button.customId));
+                    pagination.on('reactionAdd', (type, button) => console.log(type, button.customId));
 
                     pagination.paginate(command.message);
                 }),
@@ -56,7 +46,7 @@ class Test {
 
                     pagination.on('ready', () => console.log('Ready!'));
                     pagination.on('collectorEnd', () => console.log('End!'));
-                    pagination.on('interactionCreate', (type, button) => console.log(type, button));
+                    pagination.on('reactionAdd', (type, button) => console.log(type, button));
 
                     pagination.pages = pagination.pages.map(p => ({ ...p, ephemeral: true }));
 

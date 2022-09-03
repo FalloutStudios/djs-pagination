@@ -33,7 +33,7 @@ export interface PaginationReactionStringEmoji {
 }
 
 export interface ReactionPaginationOptions extends PaginationBaseOptions {
-    reactions?: ((PaginationReactionController|PaginationReactionStringEmoji) & { type: keyof Omit<typeof PaginationControllerType, "Custom"> })[];
+    reactions?: ((PaginationReactionController & { type: PaginationControllerType|keyof Omit<typeof PaginationControllerType, "Custom"> })|(PaginationReactionStringEmoji & { type: PaginationControllerType|keyof Omit<typeof PaginationControllerType, "Custom">}))[];
     onDisableAction?: ReactionPaginationOnDisableAction|keyof typeof ReactionPaginationOnDisableAction;
     authorIndependent?: boolean;
     singlePageNoReactions?: boolean;
@@ -86,7 +86,7 @@ export class ReactionPagination extends PaginationBase<MessageReaction> {
     set reactions(reactions: Required<ReactionPaginationOptions>["reactions"]) {
         reactions.forEach(reaction => {
             if ((reaction as PaginationReactionStringEmoji).emoji !== undefined) {
-                this.addPages((reaction as PaginationReactionStringEmoji).emoji, reaction.type);
+                this.addReaction((reaction as PaginationReactionStringEmoji).emoji, reaction.type);
                 return;
             }
 
@@ -101,6 +101,18 @@ export class ReactionPagination extends PaginationBase<MessageReaction> {
     set timer(timer: Required<ReactionPaginationOptions>['timer']) { this.setTimer(timer); }
     set authorId(author: Required<ReactionPaginationOptions>['authorId']) { this.setAuthorId(author); }
     set collectorOptions(options: ReactionPaginationOptions['collectorOptions']) { this._collectorOptions = options; }
+
+    constructor(options?: ReactionPaginationOptions) {
+        super(options);
+
+        this.authorId = options?.authorId ?? null;
+        this.authorIndependent = options?.authorIndependent ?? true;
+        this.singlePageNoReactions = options?.singlePageNoReactions ?? true;
+        this.reactions = options?.reactions ?? [];
+        this.timer = options?.timer ?? 20000;
+        this.onDisableAction = options?.onDisableAction ?? 'None';
+        this.collectorOptions = options?.collectorOptions;
+    }
 
     /**
      *  Sets disable interaction interval in milliseconds
@@ -188,6 +200,8 @@ export class ReactionPagination extends PaginationBase<MessageReaction> {
 
         const page = this.getPage(0);
 
+        if (page.ephemeral) throw new Error("Reactions cannot be added to ephemeral messages");
+
         await this._sendPage(page, typeof sendAs === 'string' ? SendAs[sendAs] : sendAs);
         await this._react();
 
@@ -234,7 +248,7 @@ export class ReactionPagination extends PaginationBase<MessageReaction> {
         if (!this._command || !this._pagination) throw new TypeError("Pagination is not yet ready");
 
         this._collector = this._pagination.createReactionCollector({
-            filter: r => this._reactions.some(e => r.emoji.id === e.id && r.emoji.name === e.name),
+            filter: r => this._reactions.some(e => (r.emoji.id ?? null) === e.id && r.emoji.name === e.name),
             time: this._timer,
             ...this._collectorOptions
         });
@@ -244,13 +258,16 @@ export class ReactionPagination extends PaginationBase<MessageReaction> {
         this._collector.on("collect", async (r, u) => {
             this.emit("collectorCollect", r);
             
+            r = r.partial ? await r.fetch().catch(() => null as any) : r;
+            if (!r) return;
+
             if (!r.me && this._authorIndependent && this._authorId && u.id !== this._authorId) {
                 r.users.remove(u).catch(() => {});
                 return;
             }
-        
-            const action = this._reactions.find(b => b.id === r.emoji.id && b.name === r.emoji.name)?.type;
-            if (!action) return;
+
+            const action = this._reactions.find(b => (r.emoji.id ?? null) === b.id && (r.emoji.name ?? null) === b.name)?.type;
+            if (action === undefined) return;
 
             switch (action) {
                 case PaginationControllerType.FirstPage:
@@ -272,6 +289,7 @@ export class ReactionPagination extends PaginationBase<MessageReaction> {
 
             this._collector?.resetTimer();
             this.emit("reactionAdd", action, r);
+            r.users.remove(u).catch(() => {});
         });
 
         this._collector.on("end", (c, reason) => {
