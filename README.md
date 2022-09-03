@@ -3,125 +3,77 @@
 ![GitHub](https://img.shields.io/github/license/GhexterCortes/djs-pagination?style=flat-square)
 ![npm (scoped)](https://img.shields.io/npm/v/@ghextercortes/djs-pagination?label=Latest%20Version&style=flat-square)
 
-Simple pagination for Discord.js 14 written in TypeScript.
+Simple pagination for Discord.js 14.
 
 ## Installation
 ```bash
 npm i @ghextercortes/djs-pagination
 ```
 
-## Pagination Builder
+## Pagination Builders Example
 
-Typescript
-```typescript
-import { ButtonPagination, PaginationButtonType, OnDisableAction } from '@ghextercortes/djs-pagination';
-import { EmbedBuilder, ButtonBuilder } from 'discord.js';
+#### Button Pagination
 
-// Create a new Pagination
+```js
+const { ButtonPagination } = require("@ghextercortes/djs-pagination");
+const { EmbedBuilder } = require("discord.js");
+
 const pagination = new ButtonPagination()
-    // Adds pages to the pagination
     .addPages(
-        new EmbedBuilder().setTitle('Embed Page').setDescription('some text'),
-        { content: 'Message data', embeds: [ new EmbedBuilder().setTitle('Embed Page') ] },
-        'String page'
+        'String page', // Will be converted to { content: 'String page' }
+        {
+            content: 'Custom page',
+            embeds: [
+                new EmbedBuilder()
+                    .setTitle("Embed Builder"),
+                {
+                    title: `Embed builder data`
+                }
+            ]
+        },
+        new EmbedBuilder()  // Will be converted to { embeds: [ new EmbedBuilder().setTitle("Embed Builder] }
+            .setTitle("Embed Builder")
     )
+    .addButton(new ButtonBuilder().setCustomId('FirstPage').setEmoji('⏪').setStyle(ButtonStyle.Secondary), 'FirstPage')
+    .addButton(new ButtonBuilder().setCustomId('PrevPage').setEmoji('⬅️').setStyle(ButtonStyle.Primary), 'PreviousPage')
+    .addButton(new ButtonBuilder().setCustomId('StopInteraction').setEmoji('⛔').setStyle(ButtonStyle.Danger), 'StopInteraction')
+    .addButton(new ButtonBuilder().setCustomId('NextPage').setEmoji('➡️').setStyle(ButtonStyle.Primary), 'NextPage')
+    .addButton(new ButtonBuilder().setCustomId('LastPage').setEmoji('⏩').setStyle(ButtonStyle.Secondary), 'LastPage');
 
-    // Sets the buttons
-    .addButton(new ButtonBuilder().setCustomId('first').setLabel('First').setStyle(ButtonStyle.Secondary), PaginationButtonType.FirstPage)
-    .addButton(new ButtonBuilder().setCustomId('prev').setLabel('Prev').setStyle(ButtonStyle.Primary), PaginationButtonType.PreviousPage)
-    .addButton(new ButtonBuilder().setCustomId('stop').setLabel('Stop').setStyle(ButtonStyle.Danger), PaginationButtonType.StopInteraction)
-    .addButton(new ButtonBuilder().setCustomId('next').setLabel('Next').setStyle(ButtonStyle.Primary), PaginationButtonType.NextPage)
-    .addButton(new ButtonBuilder().setCustomId('last').setLabel('Last').setStyle(ButtonStyle.Secondary), PaginationButtonType.LastPage)
-
-    // No interaction timeout
-    .setTimer(20000)
-    
-    // What to do when the pagination is disabled
-    .setOnDisableAction(OnDisableAction.DisableComponents);
-
-// Sends the pagination
-pagination.paginate(Message|Interaction);
+pagination.paginate(message);
+// or
+pagination.paginate(interaction);
 ```
 
-CommonJS
-```javascript
-const { ButtonPagination, PaginationButtonType, OnDisableAction } = require('@ghextercortes/djs-pagination');
-const { EmbedBuilder, ButtonBuilder } = require('discord.js');
+### Reaction Pagination
 
-// Create a new Pagination
-const pagination = new ButtonPagination()
-    // Adds pages to the pagination
+```js
+const { ReactionPagination } = require("@ghextercortes/djs-pagination");
+const { EmbedBuilder } = require("dicord.js");
+
+const pagination = new ReactionPagination()
     .addPages(
-        new EmbedBuilder().setTitle('Embed Page').setDescription('some text'),
-        { content: 'Message data', embeds: [ new EmbedBuilder().setTitle('Embed Page') ] },
-        'String page'
+        'String page', // Will be converted to { content: 'String page' }
+        {
+            content: 'Custom page',
+            embeds: [
+                new EmbedBuilder()
+                    .setTitle("Embed Builder"),
+                {
+                    title: `Embed builder data`
+                }
+            ]
+        },
+        new EmbedBuilder()  // Will be converted to { embeds: [ new EmbedBuilder().setTitle("Embed Builder] }
+            .setTitle("Embed Builder")
     )
+    .addReaction('⏪', 'FirstPage')
+    .addReaction('⬅️', 'PreviousPage')
+    .addReaction('⛔', 'StopInteraction')
+    .addReaction('➡️', 'NextPage')
+    .addReaction('⏩', 'LastPage');
 
-    // Sets the buttons
-    .addButton(new ButtonBuilder().setCustomId('first').setLabel('First').setStyle(ButtonStyle.Secondary), PaginationButtonType.FirstPage)
-    .addButton(new ButtonBuilder().setCustomId('prev').setLabel('Prev').setStyle(ButtonStyle.Primary), PaginationButtonType.PreviousPage)
-    .addButton(new ButtonBuilder().setCustomId('stop').setLabel('Stop').setStyle(ButtonStyle.Danger), PaginationButtonType.StopInteraction)
-    .addButton(new ButtonBuilder().setCustomId('next').setLabel('Next').setStyle(ButtonStyle.Primary), PaginationButtonType.NextPage)
-    .addButton(new ButtonBuilder().setCustomId('last').setLabel('Last').setStyle(ButtonStyle.Secondary), PaginationButtonType.LastPage)
-
-    // No interaction timeout
-    .setTimer(20000)
-    
-    // What to do when the pagination is disabled
-    .setOnDisableAction(OnDisableAction.DisableComponents);
-
-// Sends the pagination
-pagination.paginate(Message|Interaction);
-```
-
-## Pagination Builder Options
-
-Typescript
-```typescript
-import { ButtonPagination, PaginationButtonType, OnDisableAction, ComponentButtonBuilder } from '@ghextercortes/djs-pagination';
-import { EmbedBuilder, ButtonBuilder } from 'discord.js';
-
-
-const pagination = new ButtonPagination({
-    buttons: new ComponentButtonBuilder()
-        .addButton(new ButtonBuilder().setCustomId('first').setLabel('First').setStyle(ButtonStyle.Secondary), PaginationButtonType.FirstPage)
-        .addButton(new ButtonBuilder().setCustomId('prev').setLabel('Prev').setStyle(ButtonStyle.Primary), PaginationButtonType.PreviousPage)
-        .addButton(new ButtonBuilder().setCustomId('stop').setLabel('Stop').setStyle(ButtonStyle.Danger), PaginationButtonType.StopInteraction)
-        .addButton(new ButtonBuilder().setCustomId('next').setLabel('Next').setStyle(ButtonStyle.Primary), PaginationButtonType.NextPage)
-        .addButton(new ButtonBuilder().setCustomId('last').setLabel('Last').setStyle(ButtonStyle.Secondary), PaginationButtonType.LastPage),
-    pages: [
-        new EmbedBuilder().setTitle('Page Embed'),
-        'String page',
-        { embeds: [new EmbedBuilder().setTitle('Multiple Embed'), new EmbedBuilder().setTitle('Multiple Embed')] }
-    ],
-    onDisable: OnDisableAction.DeleteComponents,
-    authorIndependent: true,
-    singlePageNoButtons: true,
-    timer: 30000
-});
-```
-
-CommonJS
-```javascript
-const { ButtonPagination, PaginationButtonType, OnDisableAction, ComponentButtonBuilder } = require('@ghextercortes/djs-pagination');
-const { EmbedBuilder, ButtonBuilder } = require('discord.js');
-
-
-const pagination = new ButtonPagination({
-    buttons: new ComponentButtonBuilder()
-        .addButton(new ButtonBuilder().setCustomId('first').setLabel('First').setStyle(ButtonStyle.Secondary), PaginationButtonType.FirstPage)
-        .addButton(new ButtonBuilder().setCustomId('prev').setLabel('Prev').setStyle(ButtonStyle.Primary), PaginationButtonType.PreviousPage)
-        .addButton(new ButtonBuilder().setCustomId('stop').setLabel('Stop').setStyle(ButtonStyle.Danger), PaginationButtonType.StopInteraction)
-        .addButton(new ButtonBuilder().setCustomId('next').setLabel('Next').setStyle(ButtonStyle.Primary), PaginationButtonType.NextPage)
-        .addButton(new ButtonBuilder().setCustomId('last').setLabel('Last').setStyle(ButtonStyle.Secondary), PaginationButtonType.LastPage),
-    pages: [
-        new EmbedBuilder().setTitle('Page Embed'),
-        'String page',
-        { embeds: [new EmbedBuilder().setTitle('Multiple Embed'), new EmbedBuilder().setTitle('Multiple Embed')] }
-    ],
-    onDisable: OnDisableAction.DeleteComponents,
-    authorIndependent: true,
-    singlePageNoButtons: true,
-    timer: 30000
-});
+pagination.paginate(message);
+// or
+pagination.paginate(interaction);
 ```
