@@ -8,7 +8,9 @@
   "keywords": [
     "djs",
     "discord.js",
-    "pagination"
+    "pagination",
+    "reaction",
+    "button"
   ],
   "homepage": "https://github.com/NotGhex/djs-pagination#readme",
   "scripts": {
