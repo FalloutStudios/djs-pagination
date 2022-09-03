@@ -1,6 +1,5 @@
+import { Awaitable, CommandInteraction, EmbedBuilder, Message, normalizeArray, RestOrArray, User } from 'discord.js';
 import { Page, PageResolvable, RepliableInteraction, SendAs } from '../../types/pagination';
-
-import { Awaitable, CommandInteraction, EmbedBuilder, InteractionCollector, MappedInteractionTypes, Message, MessageComponentInteraction, MessageComponentType, normalizeArray, RestOrArray, User } from 'discord.js';
 import EventEmitter from 'events';
 
 export interface PaginationBaseOptions {

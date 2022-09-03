@@ -1,7 +1,7 @@
-import { APIUser, Awaitable, ButtonBuilder, CommandInteraction, Interaction, InteractionCollector, InteractionResponseFields, InteractionType, MappedInteractionTypes, Message, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, User } from 'discord.js';
+import { APIUser, Awaitable, ButtonBuilder, CommandInteraction, Interaction, InteractionCollector, MappedInteractionTypes, Message, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, User } from 'discord.js';
 import { ButtonPaginationComponentsBuilder, ButtonPaginationComponentsBuilderOptions } from './builders/ButtonPaginationComponentsBuilder';
 import { PaginationBase, PaginationBaseEvents, PaginationBaseOptions } from './base/PaginationBase';
-import { Page, PaginationControllerType, RepliableInteraction, SendAs } from '../types/pagination';
+import { Page, PaginationControllerType, SendAs } from '../types/pagination';
 
 export enum ButtonPaginationOnDisableAction {
     /**

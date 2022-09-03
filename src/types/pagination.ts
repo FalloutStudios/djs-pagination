@@ -1,4 +1,4 @@
-import { APIEmbed, CommandInteraction, EmbedBuilder, Interaction, InteractionResponseFields, MessageComponentInteraction, MessageOptions, ModalSubmitInteraction, StickerResolvable } from 'discord.js';
+import { APIEmbed, EmbedBuilder, Interaction, InteractionResponseFields, MessageOptions, StickerResolvable } from 'discord.js';
 
 export type PageResolvable = Page|EmbedBuilder|string;
 
