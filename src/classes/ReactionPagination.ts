@@ -4,7 +4,7 @@ import { PaginationControllerType, SendAs } from '../types/pagination';
 
 export enum ReactionPaginationOnDisableAction {
     /**
-     * Do nothing but will disable interacting with the pagination. 
+     * Do nothing but will disable interacting with the pagination.
      */
     None,
     /**
@@ -67,7 +67,7 @@ export interface ReactionPagination extends PaginationBase<MessageReaction> {
 export class ReactionPagination extends PaginationBase<MessageReaction> {
     protected _reactions: PaginationReactionController[] = [];
     protected _onDisableAction: ReactionPaginationOnDisableAction = ReactionPaginationOnDisableAction.RemovePaginationReactions;
-    protected _authorIndependent: boolean = true;
+    protected _authorIndependent: boolean = false;
     protected _singlePageNoReactions: boolean = true;
     protected _timer: number = 20000;
     protected _authorId: string|null = null;
@@ -124,12 +124,12 @@ export class ReactionPagination extends PaginationBase<MessageReaction> {
         } else {
             throw new TypeError('Invalid ttimer');
         }
-        
+
         return this;
     }
 
     /**
-     * Set if the pagination should only work for pagination author 
+     * Set if the pagination should work for any user
      * @default true
      */
     public setAuthorIndependent(authorIndependent: boolean): this {
@@ -147,7 +147,7 @@ export class ReactionPagination extends PaginationBase<MessageReaction> {
     }
 
     /**
-     * Set if pagination should add reactions if there's only single page 
+     * Set if pagination should add reactions if there's only single page
      * @default true
      */
     public setSinglePageNoReactions(singlePageNoReactions: boolean): this {
@@ -207,12 +207,12 @@ export class ReactionPagination extends PaginationBase<MessageReaction> {
         await this._react();
 
         this._addCollector();
-        
+
         return this;
     }
 
     /**
-     * Returns pagination options as JSON object 
+     * Returns pagination options as JSON object
      */
     public makeOptions(includePages: boolean = true): ReactionPaginationOptions {
         return {
@@ -236,7 +236,7 @@ export class ReactionPagination extends PaginationBase<MessageReaction> {
 
     protected async _react(): Promise<void> {
         if (!this._command || !this._pagination) throw new TypeError("Pagination is not yet ready");
-        
+
         for (const emojiData of this._reactions) {
             const emoji = emojiData.id === null ? emojiData.name : this._pagination.client.emojis.cache.get(emojiData.id);
 
@@ -253,16 +253,16 @@ export class ReactionPagination extends PaginationBase<MessageReaction> {
             time: this._timer,
             ...this._collectorOptions
         });
-        
+
         if (!this._collector) throw new Error("Cannot create pagination collector");
 
         this._collector.on("collect", async (r, u) => {
             this.emit("collectorCollect", r);
-            
+
             r = r.partial ? await r.fetch().catch(() => null as any) : r;
             if (!r) return;
 
-            if (this._authorIndependent && this._authorId && u.id !== this._authorId) {
+            if (!this._authorIndependent && this._authorId && u.id !== this._authorId) {
                 if (u.id !== this._pagination?.client.user?.id) r.users.remove(u).catch(() => {});
                 return;
             }

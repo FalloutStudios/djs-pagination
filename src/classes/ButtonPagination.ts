@@ -5,7 +5,7 @@ import { Page, PaginationControllerType, SendAs } from '../types/pagination';
 
 export enum ButtonPaginationOnDisableAction {
     /**
-     * Do nothing but will disable interacting with the pagination. 
+     * Do nothing but will disable interacting with the pagination.
      */
     None,
     /**
@@ -57,7 +57,7 @@ export interface ButtonPagination extends PaginationBase<MessageComponentInterac
 export class ButtonPagination extends PaginationBase<MessageComponentInteraction> {
     protected _buttons!: ButtonPaginationComponentsBuilder;
     protected _onDisableAction: ButtonPaginationOnDisableAction = ButtonPaginationOnDisableAction.DisableComponents;
-    protected _authorIndependent: boolean = true;
+    protected _authorIndependent: boolean = false;
     protected _singlePageNoButtons: boolean = true;
     protected _timer: number = 20000;
     protected _authorId: string|null = null;
@@ -103,16 +103,16 @@ export class ButtonPagination extends PaginationBase<MessageComponentInteraction
         } else {
             throw new TypeError('Invalid ttimer');
         }
-        
+
         return this;
     }
 
     /**
-     * Set if the pagination should only work for pagination author 
+     * Set if the pagination shouldn work for any user
      * @default true
      */
     public setAuthorIndependent(authorIndependent: boolean): this {
-        this._authorIndependent = authorIndependent;
+        this._authorIndependent = !!authorIndependent;
         return this;
     }
 
@@ -126,7 +126,7 @@ export class ButtonPagination extends PaginationBase<MessageComponentInteraction
     }
 
     /**
-     * Set if pagination should disable buttons if there's only single page 
+     * Set if pagination should disable buttons if there's only single page
      * @default true
      */
     public setSinglePageNoButtons(singlePageNoButtons: boolean): this {
@@ -147,10 +147,10 @@ export class ButtonPagination extends PaginationBase<MessageComponentInteraction
         }
 
         return this;
-    } 
+    }
 
     /**
-     * Add button to pagination 
+     * Add button to pagination
      */
     public addButton(button: ButtonBuilder, type: Omit<PaginationControllerType, "Custom">|keyof Omit<typeof PaginationControllerType, "Custom">): this {
         this._buttons.addMessageComponent(button, typeof type === 'string' ? PaginationControllerType[type] : type);
@@ -165,10 +165,10 @@ export class ButtonPagination extends PaginationBase<MessageComponentInteraction
         if (!command.channel) throw new Error("Command does not have a text channel");
         if (this._command || this._pagination) throw new TypeError("Pagination is already started");
         if (!(command instanceof Message) && !command.isRepliable()) throw new TypeError("Interaction is not repliable");
-        
+
         this._command = command;
         this._authorId = this._authorId ?? this._getAuthor(command).id;
-        
+
         const page = this.getPage(0);
         if (this._pages.length == 1 && this._singlePageNoButtons) page.components = [];
 
@@ -196,11 +196,11 @@ export class ButtonPagination extends PaginationBase<MessageComponentInteraction
         } else {
             throw new Error('Can\'t identify command type.');
         }
-            
+
         this._currentPage = index;
         return page;
     }
-    
+
     public getPage(pageIndex: number, disabledComponents: boolean = false): Page {
         const page = super.getPage(pageIndex);
 
@@ -214,7 +214,7 @@ export class ButtonPagination extends PaginationBase<MessageComponentInteraction
     }
 
     /**
-     * Returns pagination options as JSON object 
+     * Returns pagination options as JSON object
      */
     public makeOptions(includePages: boolean = true): ButtonPaginationOptions {
         return {
@@ -250,7 +250,7 @@ export class ButtonPagination extends PaginationBase<MessageComponentInteraction
         this._collector.on("collect", c => {
             this.emit("collectorCollect", c);
 
-            if (this._authorIndependent && this._authorId && c.user.id !== this._authorId) {
+            if (!this._authorIndependent && this._authorId && c.user.id !== this._authorId) {
                 if (!c.deferred) c.deferUpdate().catch(() => {});
                 return;
             }
