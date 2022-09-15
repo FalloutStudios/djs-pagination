@@ -1,4 +1,4 @@
-import { APIUser, Awaitable, ButtonBuilder, CommandInteraction, Interaction, InteractionCollector, MappedInteractionTypes, Message, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, User } from 'discord.js';
+import { APIUser, Awaitable, ButtonBuilder, ButtonComponentData, CommandInteraction, Interaction, InteractionCollector, MappedInteractionTypes, Message, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, User, UserResolvable } from 'discord.js';
 import { ButtonPaginationComponentsBuilder, ButtonPaginationComponentsBuilderOptions } from './builders/ButtonPaginationComponentsBuilder';
 import { PaginationBase, PaginationBaseEvents, PaginationBaseOptions } from './base/PaginationBase';
 import { Page, PaginationControllerType, SendAs } from '../types/pagination';
@@ -28,7 +28,7 @@ export interface ButtonPaginationOptions extends PaginationBaseOptions {
     authorIndependent?: boolean;
     singlePageNoButtons?: boolean;
     timer?: number;
-    authorId?: string|User|APIUser|null;
+    authorId?: UserResolvable|null;
     collectorOptions?: Omit<MessageCollectorOptionsParams<MessageComponentType>, "timer">;
 }
 
@@ -137,7 +137,7 @@ export class ButtonPagination extends PaginationBase<MessageComponentInteraction
     /**
      * Sets the pagination author Id
      */
-    public setAuthorId(authorId?: string|User|APIUser|null): this {
+    public setAuthorId(authorId?: UserResolvable|null): this {
         if (typeof authorId == 'string') {
             this._authorId = authorId;
         } else if (authorId !== null && authorId !== undefined) {
@@ -152,8 +152,8 @@ export class ButtonPagination extends PaginationBase<MessageComponentInteraction
     /**
      * Add button to pagination
      */
-    public addButton(button: ButtonBuilder, type: Omit<PaginationControllerType, "Custom">|keyof Omit<typeof PaginationControllerType, "Custom">): this {
-        this._buttons.addMessageComponent(button, typeof type === 'string' ? PaginationControllerType[type] : type);
+    public addButton(button: ButtonBuilder|ButtonComponentData, type: Omit<PaginationControllerType, "Custom">|keyof Omit<typeof PaginationControllerType, "Custom">): this {
+        this._buttons.addMessageComponent(button instanceof ButtonBuilder ? button : new ButtonBuilder(button), typeof type === 'string' ? PaginationControllerType[type] : type);
         return this;
     }
 
