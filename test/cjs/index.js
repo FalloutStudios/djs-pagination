@@ -1,1 +1,3 @@
-const { ButtonPagination } = require('./');
+const { ButtonPagination } = require('../');
+
+const pagination = new ButtonPagination();

@@ -1,20 +1,12 @@
-import { APIEmbed, EmbedBuilder, Interaction, InteractionResponseFields, MessageOptions, StickerResolvable } from 'discord.js';
+import { APIEmbed, EmbedBuilder, MessageCreateOptions, MessageEditOptions, StickerResolvable } from 'discord.js';
 
 export type PageResolvable = Page|EmbedBuilder|string;
 
-export interface Page {
-    tss?: boolean;
-    content?: string;
-    embeds?: (EmbedBuilder|APIEmbed)[];
-    allowedMentions?: MessageOptions["allowedMentions"];
-    attachments?: MessageOptions["attachments"];
-    files?: MessageOptions["files"];
-    stickers?: StickerResolvable[];
+export interface Page extends Pick<MessageCreateOptions, "allowedMentions" | "components" | "content" | "embeds" | "files" | "nonce" | "stickers">, Pick<MessageEditOptions, "attachments">{
     /**
      * Applicable for interaction based pagination
      */
     ephemeral?: boolean;
-    components?: MessageOptions["components"];
 }
 
 export enum PaginationControllerType {
@@ -58,5 +50,3 @@ export enum SendAs {
      */
     ReplyMessage
 }
-
-export type RepliableInteraction = Interaction & InteractionResponseFields;

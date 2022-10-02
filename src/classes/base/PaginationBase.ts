@@ -1,5 +1,5 @@
-import { Awaitable, CommandInteraction, EmbedBuilder, Message, normalizeArray, RestOrArray, User } from 'discord.js';
-import { Page, PageResolvable, RepliableInteraction, SendAs } from '../../types/pagination.js';
+import { Awaitable, CommandInteraction, EmbedBuilder, Message, normalizeArray, RepliableInteraction, RestOrArray, User } from 'discord.js';
+import { Page, PageResolvable, SendAs } from '../../types/pagination.js';
 import EventEmitter from 'events';
 
 export interface PaginationBaseOptions {
@@ -124,7 +124,7 @@ export class PaginationBase<Collected> extends EventEmitter {
      * Parse page resolvable
      */
     protected _parsePages(...pages: RestOrArray<PageResolvable>): Page[] {
-        const newPages = [];
+        const newPages: Page[] = [];
 
         for (const page of normalizeArray(pages)) {
             if (typeof page === 'string') {
