@@ -31,6 +31,9 @@
     tslib "^2.4.0"
     undici "^5.10.0"
 
+"@ghextercortes/djs-pagination@./":
+  version "3.1.0"
+
 "@sapphire/async-queue@^1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@sapphire/async-queue/-/async-queue-1.5.0.tgz#2f255a3f186635c4fb5a2381e375d3dfbc5312d8"

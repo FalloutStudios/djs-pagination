@@ -1,6 +1,0 @@
-{
-    "type": "module",
-    "devDependencies": {
-        "@ghextercortes/djs-pagination": "../../"
-    }
-}

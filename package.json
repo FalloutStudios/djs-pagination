@@ -27,9 +27,7 @@
         "build": "yarn run clean && yarn run build:types && yarn run build:cjs && yarn run build:mjs",
         "build:types": "npx tsc -p ./tsconfig/tsconfig.types.json",
         "build:cjs": "npx tsc -p ./tsconfig/tsconfig.cjs.json",
-        "build:mjs": "npx tsc -p ./tsconfig/tsconfig.mjs.json",
-        "test": "cd test && npx reciple",
-        "test:build": "yarn run build && yarn run test",
+        "build:mjs": "npx tsc -p ./tsconfig/tsconfig.mjs.json && echo '{ \"type\": \"module\" }' >> ./dist/mjs/package.json",
         "build:publish": "yarn run build && yarn publish --access public"
     },
     "repository": {
@@ -43,6 +41,9 @@
         "dist",
         "LICENSE",
         "README.md"
+    ],
+    "workspaces": [
+        "./test"
     ],
     "devDependencies": {
         "@types/node": "^18.7.14",
