@@ -52,5 +52,6 @@
     },
     "peerDependencies": {
         "discord.js": "^14.5.0"
-    }
+    },
+    "packageManager": "yarn@3.2.3"
 }
