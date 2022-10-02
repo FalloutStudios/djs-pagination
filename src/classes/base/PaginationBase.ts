@@ -1,5 +1,5 @@
 import { Awaitable, CommandInteraction, EmbedBuilder, Message, normalizeArray, RestOrArray, User } from 'discord.js';
-import { Page, PageResolvable, RepliableInteraction, SendAs } from '../../types/pagination';
+import { Page, PageResolvable, RepliableInteraction, SendAs } from '../../types/pagination.js';
 import EventEmitter from 'events';
 
 export interface PaginationBaseOptions {
@@ -51,7 +51,7 @@ export class PaginationBase<Collected> extends EventEmitter {
     }
 
     /**
-     * Get page data 
+     * Get page data
      */
     public getPage(pageIndex: number): Page {
         if (!this._pages.some((p, i) => i === pageIndex)) throw new Error(`Can\'t find page with index ${pageIndex}`);
@@ -59,7 +59,7 @@ export class PaginationBase<Collected> extends EventEmitter {
     }
 
     /**
-     * Add pages to pagination 
+     * Add pages to pagination
      */
     public addPages(...pages: RestOrArray<PageResolvable>): this {
         if (!pages.length) return this;
@@ -69,7 +69,7 @@ export class PaginationBase<Collected> extends EventEmitter {
     }
 
     /**
-     * Sets current page 
+     * Sets current page
      */
     public async setCurrentPage(index?: number): Promise<Page> {
         index = index ?? this._currentPage;
@@ -86,7 +86,7 @@ export class PaginationBase<Collected> extends EventEmitter {
         } else {
             throw new Error('Can\'t identify command type.');
         }
-            
+
         this._currentPage = index;
         return page;
     }

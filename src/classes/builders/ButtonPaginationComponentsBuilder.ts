@@ -1,6 +1,6 @@
 import { ActionRowBuilder, APIButtonComponentWithCustomId, APISelectMenuComponent, ButtonBuilder, ButtonStyle, MessageActionRowComponentBuilder } from 'discord.js';
-import { ComponentsBuilderBase, ComponentsBuilderBaseOptions } from '../base/ComponentsBuilderBase';
-import { PaginationControllerType } from '../../types/pagination';
+import { ComponentsBuilderBase, ComponentsBuilderBaseOptions } from '../base/ComponentsBuilderBase.js';
+import { PaginationControllerType } from '../../types/pagination.js';
 
 export interface PaginationButton {
     button: ButtonBuilder;
@@ -39,7 +39,7 @@ export class ButtonPaginationComponentsBuilder extends ComponentsBuilderBase {
             customId: (component.data as APIButtonComponentWithCustomId).custom_id,
             type
         });
-        
+
         this._paginationActionRow.addComponents(component);
         return this;
     }

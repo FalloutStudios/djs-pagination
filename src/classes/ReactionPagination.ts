@@ -1,6 +1,6 @@
 import { APIUser, Awaitable, IntentsBitField, Interaction, Message, MessageReaction, parseEmoji, ReactionCollector, ReactionCollectorOptions, User } from 'discord.js';
-import { PaginationBase, PaginationBaseEvents, PaginationBaseOptions } from './base/PaginationBase';
-import { PaginationControllerType, SendAs } from '../types/pagination';
+import { PaginationBase, PaginationBaseEvents, PaginationBaseOptions } from './base/PaginationBase.js';
+import { PaginationControllerType, SendAs } from '../types/pagination.js';
 
 export enum ReactionPaginationOnDisableAction {
     /**
