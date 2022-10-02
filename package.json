@@ -28,7 +28,7 @@
         "build:types": "npx tsc -p ./tsconfig/tsconfig.types.json",
         "build:cjs": "npx tsc -p ./tsconfig/tsconfig.cjs.json",
         "build:mjs": "npx tsc -p ./tsconfig/tsconfig.mjs.json && echo '{ \"type\": \"module\" }' >> ./dist/mjs/package.json",
-        "build:publish": "yarn run build && yarn publish --access public"
+        "build:publish": "yarn run build && yarn npm publish --access public"
     },
     "repository": {
         "type": "git",
