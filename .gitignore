@@ -77,7 +77,5 @@ typings/
 
 # Compiled Javascripts
 dist
-
-# yarn
-./yarn/cache
-./yarn/install-state.gz
+.yarn/install-state.gz
+.yarn/cache/
