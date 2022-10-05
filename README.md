@@ -16,7 +16,7 @@ npm i @ghextercortes/djs-pagination
 
 ```js
 const { ButtonPagination } = require("@ghextercortes/djs-pagination");
-const { EmbedBuilder } = require("discord.js");
+const { ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
 
 const pagination = new ButtonPagination()
     .addPages(
@@ -49,7 +49,7 @@ pagination.paginate(interaction);
 
 ```js
 const { ReactionPagination } = require("@ghextercortes/djs-pagination");
-const { EmbedBuilder } = require("dicord.js");
+const { ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
 
 const pagination = new ReactionPagination()
     .addPages(
