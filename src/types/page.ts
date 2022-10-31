@@ -14,9 +14,9 @@ export interface PageData extends Pick<MessageCreateOptions, 'allowedMentions' |
 
 export function resolvePage(page: PageResolvable): PageData {
     if (page instanceof Embed || page instanceof EmbedBuilder) {
-        return { embeds: [page] };
+        return { content: '', embeds: [page], components: [] };
     } else if (typeof page === 'string') {
-        return { content: page };
+        return { content: page, embeds: [], components: [] };
     } else if (typeof page === 'object' && !Array.isArray(page)){
         return page;
     } else if (typeof page === 'function') {

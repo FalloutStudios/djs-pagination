@@ -1,79 +1,88 @@
 # Djs Pagination
-![npm bundle size (scoped)](https://img.shields.io/bundlephobia/min/@ghextercortes/djs-pagination?style=flat-square)
-![GitHub](https://img.shields.io/github/license/GhexterCortes/djs-pagination?style=flat-square)
-![npm (scoped)](https://img.shields.io/npm/v/@ghextercortes/djs-pagination?label=Latest%20Version&style=flat-square)
+![npm bundle size (scoped)](https://img.shields.io/bundlephobia/min/@falloutstudios/djs-pagination?style=flat-square)
+![GitHub](https://img.shields.io/github/license/FalloutStudios/djs-pagination?style=flat-square)
+![npm (scoped)](https://img.shields.io/npm/v/@falloutstudios/djs-pagination?label=Latest%20Version&style=flat-square)
 
-Simple pagination for Discord.js 14.
+A simple button and reaction pagination library for Discord.js v14
 
 ## Installation
+
 ```bash
-npm i @ghextercortes/djs-pagination
+npm i @falloutstudios/djs-pagination discord.js
 ```
 
-## Pagination Builders Example
+## Getting Started
 
-#### Button Pagination
+> You can use this in TypeScript, ESM, or CommonJS but in these examples we're gonna use CommonJS.
+
+### Button Pagination
+> ⚠️ You cannot delete ephemeral pagination & you need to specify `authorId` when using `NewMessage` to `sendAs` param
 
 ```js
-const { ButtonPagination } = require("@ghextercortes/djs-pagination");
-const { ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
+const { ButtonPaginationBuilder } = require('@falloutstudios/djs-pagination');
+const { ButtonBuilder, Client, EmbedBuilder } = require('discord.js');
 
-const pagination = new ButtonPagination()
-    .addPages(
-        'String page', // Will be converted to { content: 'String page' }
-        {
-            content: 'Custom page',
-            embeds: [
-                new EmbedBuilder()
-                    .setTitle("Embed Builder"),
-                {
-                    title: `Embed builder data`
-                }
-            ]
-        },
-        new EmbedBuilder()  // Will be converted to { embeds: [ new EmbedBuilder().setTitle("Embed Builder] }
-            .setTitle("Embed Builder")
-    )
-    .addButton(new ButtonBuilder().setCustomId('FirstPage').setEmoji('⏪').setStyle(ButtonStyle.Secondary), 'FirstPage')
-    .addButton(new ButtonBuilder().setCustomId('PrevPage').setEmoji('⬅️').setStyle(ButtonStyle.Primary), 'PreviousPage')
-    .addButton(new ButtonBuilder().setCustomId('StopInteraction').setEmoji('⛔').setStyle(ButtonStyle.Danger), 'StopInteraction')
-    .addButton(new ButtonBuilder().setCustomId('NextPage').setEmoji('➡️').setStyle(ButtonStyle.Primary), 'NextPage')
-    .addButton(new ButtonBuilder().setCustomId('LastPage').setEmoji('⏩').setStyle(ButtonStyle.Secondary), 'LastPage');
+const bot = new Client({
+    intents: ['Guilds', 'MessageContent']
+});
 
-pagination.paginate(message);
-// or
-pagination.paginate(interaction);
+bot.on('interactionCreate', async interaction => {
+    if (interaction.isChatInputCommand() && interaction.commandName == 'pagination') {
+        // Create pagination
+        const pagination = new ButtonPaginationBuilder()
+            // Add at least one page
+            .addPages([
+                new EmbedBuilder().setDescription('Page 1'), // Single embed page
+                { content: 'Page 2', embeds: [] }, // Message data embed
+                'Page 3', // String page
+                () => new EmbedBuilder().setDescription(new Date().toString()) // Dynamic page
+            ])
+            // All buttons are optional
+            .addButton(new ButtonBuilder().setLabel('Firat').setCustomId('first'), 'FirstPage')
+            .addButton(new ButtonBuilder().setLabel('Previous').setCustomId('prev'), 'PreviousPage')
+            .addButton(new ButtonBuilder().setLabel('Stop').setCustomId('stop'), 'Stop')
+            .addButton(new ButtonBuilder().setLabel('Next').setCustomId('next'), 'NextPage')
+            .addButton(new ButtonBuilder().setLabel('Last').setCustomId('last'), 'LastPage');
+
+        await pagination.paginate(interaction, 'ReplyMessage');
+    }
+});
+
+bot.login('TOKEN');
 ```
 
 ### Reaction Pagination
+> ⚠️ You cannot use reaction pagination with ephemeral messages
 
 ```js
-const { ReactionPagination } = require("@ghextercortes/djs-pagination");
-const { ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
+const { ReactionPaginationBuilder } = require('@falloutstudios/djs-pagination');
+const { Client, EmbedBuilder } = require('discord.js');
 
-const pagination = new ReactionPagination()
-    .addPages(
-        'String page', // Will be converted to { content: 'String page' }
-        {
-            content: 'Custom page',
-            embeds: [
-                new EmbedBuilder()
-                    .setTitle("Embed Builder"),
-                {
-                    title: `Embed builder data`
-                }
-            ]
-        },
-        new EmbedBuilder()  // Will be converted to { embeds: [ new EmbedBuilder().setTitle("Embed Builder] }
-            .setTitle("Embed Builder")
-    )
-    .addReaction('⏪', 'FirstPage')
-    .addReaction('⬅️', 'PreviousPage')
-    .addReaction('⛔', 'StopInteraction')
-    .addReaction('➡️', 'NextPage')
-    .addReaction('⏩', 'LastPage');
+const bot = new Client({
+    intents: ['Guilds', 'MessageContent', 'GuildMessageReactions']
+});
 
-pagination.paginate(message);
-// or
-pagination.paginate(interaction);
+bot.on('interactionCreate', async interaction => {
+    if (interaction.isChatInputCommand() && interaction.commandName == 'pagination') {
+        // Create pagination
+        const pagination = new ReactionPaginationBuilder()
+            // Add at least one page
+            .addPages([
+                new EmbedBuilder().setDescription('Page 1'), // Single embed page
+                { content: 'Page 2', embeds: [] }, // Message data embed
+                'Page 3', // String page
+                () => new EmbedBuilder().setDescription(new Date().toString()) // Dynamic page
+            ])
+            // All reaction controllers are optional
+            .addReaction('⏪', 'FirstPage');
+            .addReaction('⬅', 'PreviousPage');
+            .addReaction('🛑', 'Stop');
+            .addReaction('➡️', 'NextPage');
+            .addReaction('⏩', 'LastPage');
+
+        await pagination.paginate(interaction, 'ReplyMessage');
+    }
+});
+
+bot.login('TOKEN');
 ```
