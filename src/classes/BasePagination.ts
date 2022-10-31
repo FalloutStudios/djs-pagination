@@ -129,7 +129,7 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
         if (!pageData) return pageData;
 
         let components = this._removeAllComponents
-            ? (pageData.components ?? [])
+            ? []
             : [
                 ...(pageData.components ?? []),
                 ...this.components,
