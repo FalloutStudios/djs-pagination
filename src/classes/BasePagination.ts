@@ -128,7 +128,17 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
 
         if (!pageData) return pageData;
 
-        let components = this._removeAllComponents ? [] : [...this.components, ...(this._paginationComponent !== null && !this._removePaginationComponents ? [this._paginationComponent] : [])];
+        let components = this._removeAllComponents
+            ? (pageData.components ?? [])
+            : [
+                ...(pageData.components ?? []),
+                ...this.components,
+                ...(
+                    this._paginationComponent !== null && !this._removePaginationComponents
+                        ? [this._paginationComponent]
+                        : []
+                    )
+            ];
 
         if (this._disableAllComponents) components = components.map(c => {
             if (c === undefined) return c;
@@ -145,7 +155,6 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
         return {
             ...pageData,
             components: [
-                ...(pageData.components ? pageData.components : []),
                 ...components
             ]
         }
