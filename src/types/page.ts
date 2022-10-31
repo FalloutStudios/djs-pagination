@@ -2,7 +2,7 @@ import { ActionRow, ActionRowBuilder, ActionRowData, Embed, EmbedBuilder, Messag
 
 export type PageResolvable = StaticPageResolvable|DynamicPageFunction;
 export type StaticPageResolvable = string|PageData|EmbedBuilder|Embed;
-export type DynamicPageFunction = (() => StaticPageResolvable);
+export type DynamicPageFunction = () => PageResolvable;
 
 export interface PageData extends Pick<MessageCreateOptions, 'allowedMentions' | 'content' | 'embeds' | 'files' | 'nonce' | 'stickers'> {
     components?: (ActionRowBuilder<MessageActionRowComponentBuilder>|ActionRow<MessageActionRowComponent>|ActionRowData<MessageActionRowComponent|MessageActionRowComponentData>)[];
