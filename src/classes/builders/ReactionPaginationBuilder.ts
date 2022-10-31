@@ -215,6 +215,7 @@ export class ReactionPaginationBuilder<Sent extends boolean = boolean> extends B
 
     protected async _react(): Promise<void> {
         if (!this.isSent()) throw new TypeError("Pagination is not yet ready");
+        if (this.pages.length <= 1 && this.singlePageNoReactions) return;
 
         for (const emojiData of this._reactions) {
             const emoji = emojiData.id === null ? emojiData.name : this.pagination.client.emojis.cache.get(emojiData.id);
