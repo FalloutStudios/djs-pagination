@@ -1,13 +1,13 @@
 {
-    "description": "Discord.js Pagination",
-    "author": "Ghex",
-    "name": "@ghextercortes/djs-pagination",
+    "description": "Discord.js v14 button and reaction pagination",
+    "author": "FalloutStudios",
+    "name": "@falloutstudios/djs-pagination",
     "main": "./dist/cjs/index.js",
     "types": "./dist/types/index.d.ts",
     "module": "./dist/mjs/index.js",
     "type": "commonjs",
-    "license": "MIT",
-    "version": "3.1.1",
+    "license": "GPL-3.0",
+    "version": "1.0.0",
     "exports": {
         ".": {
             "import": {
@@ -30,7 +30,7 @@
         "reaction",
         "button"
     ],
-    "homepage": "https://github.com/NotGhex/djs-pagination#readme",
+    "homepage": "https://github.com/FalloutStudios/djs-pagination#readme",
     "scripts": {
         "clean": "npx rimraf dist",
         "build": "npm run clean && npx tsc",
@@ -38,10 +38,10 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/NotGhex/djs-pagination.git"
+        "url": "git+https://github.com/FalloutStudios/djs-pagination.git"
     },
     "bugs": {
-        "url": "https://github.com/NotGhex/djs-pagination/issues"
+        "url": "https://github.com/FalloutStudios/djs-pagination/issues"
     },
     "files": [
         "dist",

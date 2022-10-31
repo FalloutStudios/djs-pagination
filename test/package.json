@@ -1,7 +1,11 @@
 {
     "name": "test",
     "type": "module",
+    "scripts": {
+        "test": "npx reciple -y -t env:TOKEN"
+    },
     "dependencies": {
-        "@ghextercortes/djs-pagination": "file:../"
+        "@falloutstudios/djs-pagination": "file:../",
+        "reciple": "6.0.0-dev.23"
     }
 }
