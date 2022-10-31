@@ -47,7 +47,7 @@ export class PaginationModule {
                             }
                         ]);
 
-                    await pagination.paginate(data.message);
+                    await pagination.paginate(data.message, '');
                 })
         ];
 
