@@ -5,6 +5,7 @@ import { SendAs } from '../types/enums';
 
 export interface BasePaginationData {
     pages?: PageResolvable[];
+    authorId?: UserResolvable|null;
     currentPageIndex?: number;
     components?: (ActionRowData<MessageActionRowComponent|MessageActionRowComponentData>|ActionRowBuilder<MessageActionRowComponentBuilder>)[];
 }
@@ -36,11 +37,11 @@ export interface BasePagination<Collected, Sent extends boolean = boolean> exten
 
 export class BasePagination<Collected, Sent extends boolean = boolean> extends EventEmitter {
     protected _pages: (PageData|DynamicPageFunction)[] = [];
+    protected _authorId: string|null = null;
     protected _currentPageIndex: number = 0;
     protected _pagination: Message|null = null;
     protected _command: Message|RepliableInteraction|null = null;
     protected _components: (ActionRowData<MessageActionRowComponent|MessageActionRowComponentData>|ActionRowBuilder<MessageActionRowComponentBuilder>)[] = [];
-    protected _authorId: string|null = null;
 
     protected _paginationComponent: ActionRowData<MessageActionRowComponent|MessageActionRowComponentData>|ActionRowBuilder<MessageActionRowComponentBuilder>|null = null;
     protected _disableAllComponents: boolean = false;
@@ -67,6 +68,7 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
         super();
 
         this.setPages(...(options?.pages ?? []));
+        this.setAuthorId(options?.authorId);
 
         this._currentPageIndex = options?.currentPageIndex ?? this.currentPageIndex;
     }
@@ -93,8 +95,8 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
      * Set author id
      * @param author author user resolvable
      */
-    public setAuthorId(author: UserResolvable): this {
-        this._authorId = typeof author === 'string' ? author : author.id;
+    public setAuthorId(author?: UserResolvable|null): this {
+        this._authorId = typeof author === 'string' ? author : author?.id || null;
         return this;
     }
 
@@ -159,7 +161,8 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
     public toJSON(): BasePaginationData {
         return {
             pages: this.pages,
-            currentPageIndex: this.currentPageIndex
+            authorId: this.authorId,
+            currentPageIndex: this.currentPageIndex,
         };
     }
 
