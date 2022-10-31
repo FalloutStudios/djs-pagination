@@ -1,4 +1,4 @@
-import { ActionRowBuilder, APIButtonComponentWithCustomId, ButtonBuilder, ButtonInteraction, ButtonStyle, InteractionButtonComponentData, InteractionCollector, MappedInteractionTypes, Message, MessageActionRowComponentBuilder, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, normalizeArray, RepliableInteraction, RestOrArray } from 'discord.js';
+import { ActionRowBuilder, APIButtonComponentWithCustomId, Awaitable, ButtonBuilder, ButtonInteraction, ButtonStyle, InteractionButtonComponentData, InteractionCollector, MappedInteractionTypes, Message, MessageActionRowComponentBuilder, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, normalizeArray, RepliableInteraction, RestOrArray } from 'discord.js';
 import { Button, ButtonsOnDisable, RawButton } from '../../types/buttons';
 import { getEnumValue, PaginationControllerType, SendAs } from '../../types/enums';
 import { BasePagination, BasePaginationData, BasePaginationEvents } from '../BasePagination';
@@ -14,6 +14,24 @@ export interface ButtonPaginationData extends BasePaginationData {
 
 export interface ButtonPaginationEvents extends BasePaginationEvents<MessageComponentInteraction> {
     'interactionCreate': [interaction: ButtonInteraction, button: Button];
+}
+
+export interface ButtonPagination extends BasePagination<MessageComponentInteraction> {
+    on<E extends keyof ButtonPaginationEvents>(event: E, listener: (...args: ButtonPaginationEvents[E]) => Awaitable<void>): this;
+    on<E extends string|symbol>(event: Exclude<E, keyof ButtonPaginationEvents>, listener: (...args: any) => Awaitable<void>): this;
+
+    once<E extends keyof ButtonPaginationEvents>(event: E, listener: (...args: ButtonPaginationEvents[E]) => Awaitable<void>): this;
+    once<E extends string|symbol>(event: Exclude<E, keyof ButtonPaginationEvents>, listener: (...args: any) => Awaitable<void>): this;
+
+
+    emit<E extends keyof ButtonPaginationEvents>(event: E, ...args: ButtonPaginationEvents[E]): boolean;
+    emit<E extends string|symbol>(event: Exclude<E, keyof ButtonPaginationEvents>, ...args: any): boolean;
+
+    off<E extends keyof ButtonPaginationEvents>(event: E, listener: (...args: ButtonPaginationEvents[E]) => Awaitable<void>): this;
+    off<E extends string|symbol>(event: Exclude<E, keyof ButtonPaginationEvents>, listener: (...args: any) => Awaitable<void>): this;
+
+    removeAllListeners<E extends keyof ButtonPaginationEvents>(event?: E): this;
+    removeAllListeners(event?: string|symbol): this;
 }
 
 export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends BasePagination<MessageComponentInteraction> {
@@ -163,10 +181,10 @@ export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends Bas
                     await this.setCurrentPage(0).catch(() => {});
                     break;
                 case PaginationControllerType.PreviousPage:
-                    this.setCurrentPage(this.currentPageIndex - 1 < 0 ? this.pages.length - 1 : this.currentPageIndex - 1).catch(() => {});;
+                    this.setCurrentPage(this.previousPageIndex).catch(() => {});
                     break;
                 case PaginationControllerType.NextPage:
-                    this.setCurrentPage(this.currentPageIndex + 1 > this.pages.length - 1 ? 0 : this.currentPageIndex + 1).catch(() => {});;
+                    this.setCurrentPage(this.nextPageIndex).catch(() => {});
                     break;
                 case PaginationControllerType.LastPage:
                     await this.setCurrentPage(this.pages.length - 1).catch(() => {});

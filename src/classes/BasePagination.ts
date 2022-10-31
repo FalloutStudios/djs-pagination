@@ -1,4 +1,4 @@
-import { ActionRow, ActionRowBuilder, ActionRowData, If, Message, MessageActionRowComponent, MessageActionRowComponentBuilder, MessageActionRowComponentData, normalizeArray, RepliableInteraction, RestOrArray, UserResolvable } from 'discord.js';
+import { ActionRow, ActionRowBuilder, ActionRowData, Awaitable, If, Message, MessageActionRowComponent, MessageActionRowComponentBuilder, MessageActionRowComponentData, normalizeArray, RepliableInteraction, RestOrArray, UserResolvable } from 'discord.js';
 import EventEmitter from 'events';
 import { DynamicPageFunction, PageData, PageResolvable, resolvePage } from '../types/page';
 import { SendAs } from '../types/enums';
@@ -10,10 +10,28 @@ export interface BasePaginationData {
 }
 
 export interface BasePaginationEvents<Collected> {
-    'ready': [];
-    'pageChange': [page: PageData, index: number];
-    'collect': [collected: Collected];
-    'end': [reason: string];
+    ready: [];
+    pageChange: [page: PageData, index: number];
+    collect: [collected: Collected];
+    end: [reason: string];
+}
+
+export interface BasePagination<Collected, Sent extends boolean = boolean> extends EventEmitter {
+    on<E extends keyof BasePaginationEvents<Collected>>(event: E, listener: (...args: BasePaginationEvents<Collected>[E]) => Awaitable<void>): this;
+    on<E extends string|symbol>(event: Exclude<E, keyof BasePaginationEvents<Collected>>, listener: (...args: any) => Awaitable<void>): this;
+
+    once<E extends keyof BasePaginationEvents<Collected>>(event: E, listener: (...args: BasePaginationEvents<Collected>[E]) => Awaitable<void>): this;
+    once<E extends string|symbol>(event: Exclude<E, keyof BasePaginationEvents<Collected>>, listener: (...args: any) => Awaitable<void>): this;
+
+
+    emit<E extends keyof BasePaginationEvents<Collected>>(event: E, ...args: BasePaginationEvents<Collected>[E]): boolean;
+    emit<E extends string|symbol>(event: Exclude<E, keyof BasePaginationEvents<Collected>>, ...args: any): boolean;
+
+    off<E extends keyof BasePaginationEvents<Collected>>(event: E, listener: (...args: BasePaginationEvents<Collected>[E]) => Awaitable<void>): this;
+    off<E extends string|symbol>(event: Exclude<E, keyof BasePaginationEvents<Collected>>, listener: (...args: any) => Awaitable<void>): this;
+
+    removeAllListeners<E extends keyof BasePaginationEvents<Collected>>(event?: E): this;
+    removeAllListeners(event?: string|symbol): this;
 }
 
 export class BasePagination<Collected, Sent extends boolean = boolean> extends EventEmitter {
@@ -34,6 +52,9 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
     get pagination() { return this._pagination as If<Sent, Message>; }
     get command() { return this._command as If<Sent, Message|RepliableInteraction>; }
     get components() { return this._components; }
+
+    get previousPageIndex() { return this.currentPageIndex - 1 < 0 ? this.pages.length - 1 : this.currentPageIndex - 1; }
+    get nextPageIndex() { return this.currentPageIndex + 1 >= this.pages.length ? 0 : this.currentPageIndex + 1; }
 
     get authorId(): string|null {
         if (this._authorId) return this._authorId;
@@ -148,7 +169,7 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
      * @param pageIndex page index
      */
     public async setCurrentPage(pageIndex?: number): Promise<PageData> {
-        const page = pageIndex ? this.getPage(pageIndex) : this.currentPage;
+        const page = pageIndex !== undefined ? this.getPage(pageIndex) : this.currentPage;
         if (!page) throw new RangeError(`Cannot find page index '${pageIndex}'`);
 
         this._currentPageIndex = pageIndex ?? this.currentPageIndex;
@@ -159,6 +180,8 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
             } else {
                 await this.pagination.edit(page);
             }
+
+            this.emit('pageChange', this.currentPage!, this.currentPageIndex);
         }
 
         return page;
