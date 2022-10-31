@@ -1,7 +1,7 @@
 // @ts-check
 import { ButtonBuilder, ButtonStyle } from 'discord.js';
 import { MessageCommandBuilder, SlashCommandBuilder } from 'reciple';
-import { ButtonPaginationBuilder } from '@falloutstudios/djs-pagination';
+import { ButtonPaginationBuilder, ReactionPaginationBuilder } from '@falloutstudios/djs-pagination';
 
 export class PaginationModule {
     versions = '^6';
@@ -62,10 +62,31 @@ export class PaginationModule {
                 .setName('paginate')
                 .setDescription('Pagination example')
                 .setExecute(async data => {
-                    const pagination = new ButtonPaginationBuilder()
+                    const pagination = new ReactionPaginationBuilder()
                         .addPages(pages)
                         .setAuthorId(data.message.author)
-                        .setButtons(buttons);
+                        .setReactions(
+                            {
+                                emoji: '⏪',
+                                type: 'FirstPage'
+                            },
+                            {
+                                emoji: '⬅',
+                                type: 'PreviousPage'
+                            },
+                            {
+                                emoji: '🛑',
+                                type: 'Stop'
+                            },
+                            {
+                                emoji: '➡️',
+                                type: 'NextPage'
+                            },
+                            {
+                                emoji: '⏩',
+                                type: 'LastPage'
+                            }
+                        )
 
                     this.paginationListener(pagination);
 
