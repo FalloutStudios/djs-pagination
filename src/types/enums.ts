@@ -1,26 +1,18 @@
-import { Embed, EmbedBuilder, MessageCreateOptions } from 'discord.js';
-
-export type PageResolvable = StaticPageResolvable|DynamicPageFunction;
-export type StaticPageResolvable = string|PageData|EmbedBuilder|Embed;
-export type DynamicPageFunction = (() => StaticPageResolvable);
-
-export interface PageData extends Pick<MessageCreateOptions, 'allowedMentions' | 'components' | 'content' | 'embeds' | 'files' | 'nonce' | 'stickers'> {
-    /**
-     * Usable for interaction based paginations to send page privately
-     */
-    ephemeral?: boolean;
+export function getEnumValue<Enum>(enum_: Enum, key: string|number): number {
+    // @ts-expect-error
+    return typeof key === 'string' ? enum_[key] : key;
 }
 
-export function resolvePage(page: PageResolvable): PageData {
-    if (page instanceof Embed || page instanceof EmbedBuilder) {
-        return { embeds: [page] };
-    } else if (typeof page === 'string') {
-        return { content: page };
-    } else if (typeof page === 'object' && !Array.isArray(page)){
-        return page;
-    } else if (typeof page === 'function') {
-        return resolvePage(page());
-    }
+export enum SendAs {
+    NewMessage = 1,
+    EditMessage,
+    ReplyMessage
+}
 
-    throw new Error('Unresolvable pagination page');
+export enum PaginationControllerType {
+    FirstPage = 1,
+    PreviousPage,
+    NextPage,
+    LastPage,
+    Stop
 }

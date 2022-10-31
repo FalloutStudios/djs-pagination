@@ -1,11 +1,12 @@
-import { If, Message, normalizeArray, RepliableInteraction, RestOrArray, User } from 'discord.js';
+import { ActionRow, ActionRowBuilder, ActionRowData, If, Message, MessageActionRowComponent, MessageActionRowComponentBuilder, MessageActionRowComponentData, normalizeArray, RepliableInteraction, RestOrArray, UserResolvable } from 'discord.js';
 import EventEmitter from 'events';
-import { DynamicPageFunction, PageData, PageResolvable, resolvePage } from '../types/enums';
-import { SendAs } from '../types/send';
+import { DynamicPageFunction, PageData, PageResolvable, resolvePage } from '../types/page';
+import { SendAs } from '../types/enums';
 
 export interface BasePaginationData {
-    pages: PageResolvable;
+    pages?: PageResolvable[];
     currentPageIndex?: number;
+    components?: (ActionRowData<MessageActionRowComponent|MessageActionRowComponentData>|ActionRowBuilder<MessageActionRowComponentBuilder>)[];
 }
 
 export interface BasePaginationEvents<Collected> {
@@ -18,15 +19,21 @@ export interface BasePaginationEvents<Collected> {
 export class BasePagination<Collected, Sent extends boolean = boolean> extends EventEmitter {
     protected _pages: (PageData|DynamicPageFunction)[] = [];
     protected _currentPageIndex: number = 0;
-    protected _pagination: Message|RepliableInteraction|null = null;
+    protected _pagination: Message|null = null;
     protected _command: Message|RepliableInteraction|null = null;
+    protected _components: (ActionRowData<MessageActionRowComponent|MessageActionRowComponentData>|ActionRowBuilder<MessageActionRowComponentBuilder>)[] = [];
     protected _authorId: string|null = null;
+
+    protected _paginationComponent: ActionRowData<MessageActionRowComponent|MessageActionRowComponentData>|ActionRowBuilder<MessageActionRowComponentBuilder>|null = null;
+    protected _disableComponents: boolean = false;
+    protected _removeComponents: boolean = false;
 
     get pages() { return this._pages; }
     get currentPageIndex() { return this._currentPageIndex; }
     get currentPage() { return this.getPage(this.currentPageIndex); }
-    get pagination() { return this._pagination as If<Sent, Message|RepliableInteraction>; }
+    get pagination() { return this._pagination as If<Sent, Message>; }
     get command() { return this._command as If<Sent, Message|RepliableInteraction>; }
+    get components() { return this._components; }
 
     get authorId(): string|null {
         if (this._authorId) return this._authorId;
@@ -47,7 +54,7 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
      * @param pages array of page data to add
      */
     public addPages(...pages: RestOrArray<PageResolvable>): this {
-        this._pages.push(...BasePagination.resolvePages(normalizeArray(pages)));
+        this._pages.push(...BasePagination.resolveStaticPages(normalizeArray(pages)));
         return this;
     }
 
@@ -56,7 +63,34 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
      * @param pages array of page data
      */
     public setPages(...pages: RestOrArray<PageResolvable>): this {
-        this._pages = BasePagination.resolvePages(normalizeArray(pages));
+        this._pages = BasePagination.resolveStaticPages(normalizeArray(pages));
+        return this;
+    }
+
+    /**
+     * Set author id
+     * @param author author user resolvable
+     */
+    public setAuthorId(author: UserResolvable): this {
+        this._authorId = typeof author === 'string' ? author : author.id;
+        return this;
+    }
+
+    /**
+     * Add action rows to page components
+     * @param components action rows
+     */
+    public addComponents(...components: RestOrArray<ActionRowData<MessageActionRowComponent>|ActionRowBuilder<MessageActionRowComponentBuilder>>): this {
+        this._components?.push(...normalizeArray(components).map(c => c instanceof ActionRowBuilder ? c : new ActionRowBuilder<MessageActionRowComponentBuilder>(c)));
+        return this;
+    }
+
+    /**
+     * Set page action rows
+     * @param components action rows
+     */
+    public setComponents(...components: RestOrArray<ActionRowData<MessageActionRowComponent>|ActionRowBuilder<MessageActionRowComponentBuilder>>): this {
+        this._components = normalizeArray(components).map(c => c instanceof ActionRowBuilder ? c : new ActionRowBuilder(c));
         return this;
     }
 
@@ -66,7 +100,33 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
      */
     public getPage(pageIndex: number): PageData|undefined {
         const page = this.pages.find((p, i) => i === pageIndex);
-        return typeof page === 'function' ? resolvePage(page()) : page;
+        const pageData = typeof page === 'function' ? resolvePage(page()) : page;
+
+        if (!pageData) return pageData;
+
+        let components = this._removeComponents
+            ? []
+            : [...this.components, ...(this._paginationComponent !== null ? [this._paginationComponent] : [])];
+
+        if (this._disableComponents) components = components.map(c => {
+            if (c === undefined) return c;
+
+            const actionrow = c instanceof ActionRowBuilder
+                ? c
+                : new ActionRowBuilder<MessageActionRowComponentBuilder>(c);
+
+            actionrow.components.forEach(c => c.setDisabled(true));
+
+            return actionrow;
+        });
+
+        return {
+            ...pageData,
+            components: [
+                ...(pageData.components ? pageData.components : []),
+                ...components
+            ]
+        }
     }
 
     /**
@@ -74,6 +134,13 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
      */
     public isSent(): this is BasePagination<Collected, true> {
         return this.command !== null && this.pagination !== null;
+    }
+
+    public toJSON(): BasePaginationData {
+        return {
+            pages: this.pages,
+            currentPageIndex: this.currentPageIndex
+        };
     }
 
     /**
@@ -87,8 +154,8 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
         this._currentPageIndex = pageIndex ?? this.currentPageIndex;
 
         if (this.isSent()) {
-            if (!(this.pagination instanceof Message)) {
-                await this.pagination.editReply(page);
+            if (!(this.command instanceof Message)) {
+                await this.command.editReply(page);
             } else {
                 await this.pagination.edit(page);
             }
@@ -104,7 +171,6 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
      */
     protected async _sendPage(page: PageData, sendAs: SendAs): Promise<void> {
         if (!this.command) throw new Error(`Pagination command trigger is undefined`);
-
 
         switch (sendAs) {
             case SendAs.NewMessage:

@@ -1,0 +1,215 @@
+import { ActionRowBuilder, APIButtonComponentWithCustomId, ButtonBuilder, ButtonInteraction, ButtonStyle, InteractionButtonComponentData, InteractionCollector, MappedInteractionTypes, Message, MessageActionRowComponentBuilder, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, normalizeArray, RepliableInteraction, RestOrArray } from 'discord.js';
+import { Button, ButtonsOnDisable, RawButton } from '../../types/buttons';
+import { getEnumValue, PaginationControllerType, SendAs } from '../../types/enums';
+import { BasePagination, BasePaginationData, BasePaginationEvents } from '../BasePagination';
+
+export interface ButtonPaginationData extends BasePaginationData {
+    buttons?: RawButton[];
+    onDisable?: ButtonsOnDisable|keyof typeof ButtonsOnDisable;
+    authorDependend?: boolean;
+    singlePageNoButtons?: boolean;
+    timer?: number;
+    collectorOptions?: Omit<MessageCollectorOptionsParams<MessageComponentType>, "timer">;
+}
+
+export interface ButtonPaginationEvents extends BasePaginationEvents<MessageComponentInteraction> {
+    'interactionCreate': [interaction: ButtonInteraction, button: Button];
+}
+
+export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends BasePagination<MessageComponentInteraction> {
+    protected _buttons: Button[] = [];
+    protected _onDisable: ButtonsOnDisable = ButtonsOnDisable.DisableComponents;
+    protected _authorDependend: boolean = true;
+    protected _singlePageNoButtons: boolean = true;
+    protected _timer: number = 20000;
+    protected _collector: InteractionCollector<MappedInteractionTypes[MessageComponentType]>|null = null;
+    protected _collectorOptions?: Omit<MessageCollectorOptionsParams<MessageComponentType>, "timer">;
+
+    get buttons() { return this._buttons; }
+    get onDisable() { return this._onDisable; }
+    get authorDependend() { return this._authorDependend; }
+    get singlePageNoButtons() { return this._singlePageNoButtons; }
+    get timer() { return this._timer; }
+    get collector() { return this._collector; }
+    get collectorOptions() { return this._collectorOptions; }
+
+    constructor(options?: ButtonPaginationData|ButtonPaginationBuilder) {
+        super(options);
+
+        this.setButtons(...(options?.buttons ?? []));
+        this.setOnDisable(options?.onDisable ?? this.onDisable);
+        this.setAuthorDependent(options?.authorDependend ?? this.authorDependend);
+        this.setSinglePageNoButtons(options?.singlePageNoButtons ?? this.singlePageNoButtons);
+        this.setTimer(options?.timer ?? this.timer);
+        this.setCollectorOptions(options?.collectorOptions ?? this.collectorOptions);
+    }
+
+    /**
+     * Add button controller to pagination
+     * @param button Button data or builder
+     * @param type Controller type
+     */
+    public addButton(button: ButtonBuilder|InteractionButtonComponentData, type: PaginationControllerType|keyof typeof PaginationControllerType): this {
+        this._buttons.push(ButtonPaginationBuilder.resolveButton({
+            builder: button,
+            type
+        }));
+
+        return this;
+    }
+
+    /**
+     * Set button controllers
+     * @param buttons Button controllers data
+     */
+    public setButtons(...buttons: RestOrArray<RawButton>): this {
+        this._buttons = normalizeArray(buttons).map(b => ButtonPaginationBuilder.resolveButton(b));
+        return this;
+    }
+
+    /**
+     * Action on disable
+     * @param onDisable on disable action
+     */
+    public setOnDisable(onDisable: ButtonsOnDisable|keyof typeof ButtonsOnDisable): this {
+        this._onDisable = getEnumValue(ButtonsOnDisable, onDisable);
+        return this;
+    }
+
+    /**
+     * Pagination will only works for command author
+     * @param authorDependend set author dependent
+     */
+    public setAuthorDependent(authorDependend: boolean): this {
+        this._authorDependend = !!authorDependend;
+        return this;
+    }
+
+    /**
+     * Disable pagination controllers with single page pagination
+     * @param singlePageNoButtons single page no buttons
+     */
+    public setSinglePageNoButtons(singlePageNoButtons: boolean): this {
+        this._singlePageNoButtons = !!singlePageNoButtons;
+        return this;
+    }
+
+    /**
+     * Custom collector options
+     * @param collectorOptions collector options
+     */
+    public setCollectorOptions(collectorOptions?: Omit<MessageCollectorOptionsParams<MessageComponentType>, "timer">|null): this {
+        this._collectorOptions = collectorOptions || undefined;
+        return this;
+    }
+
+    /**
+     * Collector timer
+     * @param timer timer in milliseconds
+     */
+    public setTimer(timer: number): this {
+        this._timer = timer;
+        return this;
+    }
+
+    public async paginate(command: Message|RepliableInteraction, sendAs: SendAs|keyof typeof SendAs = SendAs.ReplyMessage): Promise<ButtonPaginationBuilder<true>> {
+        if (this.isSent()) throw new Error(`Pagination is already sent`);
+        if (!this.pages.length) throw new Error(`Pagination does not have any pages`);
+
+        this._command = command;
+        this._paginationComponent = new ActionRowBuilder<MessageActionRowComponentBuilder>()
+            .setComponents(this.buttons.map(b => b.builder));
+
+        if (this.pages.length <= 1 && this.singlePageNoButtons) this._removeComponents = true;
+
+        await this._sendPage(this.currentPage!, getEnumValue(SendAs, sendAs));
+        this.emit('ready');
+
+        if (!this._removeComponents) this._addCollector();
+
+        return this;
+    }
+
+    public toJSON(): ButtonPaginationData {
+        return {
+            ...super.toJSON(),
+            buttons: this.buttons,
+            onDisable: this.onDisable,
+            authorDependend: this.authorDependend,
+            singlePageNoButtons: this.singlePageNoButtons,
+            timer: this.timer,
+            collectorOptions: this.collectorOptions
+        }
+    }
+
+    protected _addCollector(): void {
+        if (!this.isSent()) throw new Error(`Pagination is not ready`);
+
+        this._collector = this.pagination.createMessageComponentCollector({
+            ...this.collectorOptions,
+            time: this.timer
+        });
+
+        this._collector.on('collect', async component => {
+            this.emit('collect', component);
+
+            if (this.authorDependend && this.authorId !== component.user.id) return;
+
+            const button = this.buttons.find(b => (b.builder.data as APIButtonComponentWithCustomId).custom_id === component.customId);
+            if (!button) return;
+
+            switch (button.type) {
+                case PaginationControllerType.FirstPage:
+                    await this.setCurrentPage(0).catch(() => {});
+                    break;
+                case PaginationControllerType.PreviousPage:
+                    this.setCurrentPage(this.currentPageIndex - 1 < 0 ? this.pages.length - 1 : this.currentPageIndex - 1).catch(() => {});;
+                    break;
+                case PaginationControllerType.NextPage:
+                    this.setCurrentPage(this.currentPageIndex + 1 > this.pages.length - 1 ? 0 : this.currentPageIndex + 1).catch(() => {});;
+                    break;
+                case PaginationControllerType.LastPage:
+                    await this.setCurrentPage(this.pages.length - 1).catch(() => {});
+                    break;
+                case PaginationControllerType.Stop:
+                    this._collector?.stop('PaginationEnded');
+                    break;
+            }
+
+            this.emit('interactionCreate', component, button);
+            this._collector?.resetTimer();
+
+            if (!component.deferred) await component.deferUpdate().catch(() => {})
+        });
+
+        this._collector.on('end', async (collected, reason) => {
+            this.emit('end', reason);
+
+            switch (this.onDisable) {
+                case ButtonsOnDisable.RemoveComponents:
+                    this._removeComponents = true;
+
+                    await this.setCurrentPage().catch(() => {});
+                    break;
+                case ButtonsOnDisable.DisableComponents:
+                    this._disableComponents = true;
+
+                    await this.setCurrentPage().catch(() => {});
+                    break;
+                case ButtonsOnDisable.DeletePagination:
+                    if (this.pagination?.deletable) await this.pagination.delete().catch(() => {});
+                    break;
+            }
+        });
+    }
+
+    public static resolveButton(button: RawButton): Button {
+        if (!(button.builder instanceof ButtonBuilder)) button.builder = new ButtonBuilder(button.builder);
+        if (button.builder.data.style === ButtonStyle.Link) throw new Error(`Link button is not usable as pagination controller`);
+
+        return {
+            builder: button.builder,
+            type: getEnumValue(PaginationControllerType, button.type)
+        };
+    }
+}
