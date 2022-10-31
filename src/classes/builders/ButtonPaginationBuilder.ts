@@ -1,4 +1,4 @@
-import { ActionRowBuilder, APIButtonComponentWithCustomId, Awaitable, ButtonBuilder, ButtonInteraction, ButtonStyle, InteractionButtonComponentData, InteractionCollector, MappedInteractionTypes, Message, MessageActionRowComponentBuilder, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, normalizeArray, RepliableInteraction, RestOrArray } from 'discord.js';
+import { ActionRowBuilder, APIButtonComponentWithCustomId, Awaitable, ButtonBuilder, ButtonInteraction, ButtonStyle, CacheType, If, InteractionButtonComponentData, InteractionCollector, MappedInteractionTypes, Message, MessageActionRowComponentBuilder, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, normalizeArray, RepliableInteraction, RestOrArray } from 'discord.js';
 import { Button, ButtonsOnDisable, RawButton } from '../../types/buttons';
 import { getEnumValue, PaginationControllerType, SendAs } from '../../types/enums';
 import { BasePagination, BasePaginationData, BasePaginationEvents } from '../BasePagination';
@@ -6,17 +6,17 @@ import { BasePagination, BasePaginationData, BasePaginationEvents } from '../Bas
 export interface ButtonPaginationData extends BasePaginationData {
     buttons?: RawButton[];
     onDisable?: ButtonsOnDisable|keyof typeof ButtonsOnDisable;
-    authorDependend?: boolean;
+    authorDependent?: boolean;
     singlePageNoButtons?: boolean;
     timer?: number;
-    collectorOptions?: Omit<MessageCollectorOptionsParams<MessageComponentType>, "timer">;
+    collectorOptions?: Omit<MessageCollectorOptionsParams<MessageComponentType>, "time">;
 }
 
 export interface ButtonPaginationEvents extends BasePaginationEvents<MessageComponentInteraction> {
-    'interactionCreate': [interaction: ButtonInteraction, button: Button];
+    'interactionCreate': [interaction: ButtonInteraction, controller: Button];
 }
 
-export interface ButtonPagination extends BasePagination<MessageComponentInteraction> {
+export interface ButtonPaginationBuilder<Sent extends boolean = boolean> extends BasePagination<MessageComponentInteraction, Sent> {
     on<E extends keyof ButtonPaginationEvents>(event: E, listener: (...args: ButtonPaginationEvents[E]) => Awaitable<void>): this;
     on<E extends string|symbol>(event: Exclude<E, keyof ButtonPaginationEvents>, listener: (...args: any) => Awaitable<void>): this;
 
@@ -34,21 +34,21 @@ export interface ButtonPagination extends BasePagination<MessageComponentInterac
     removeAllListeners(event?: string|symbol): this;
 }
 
-export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends BasePagination<MessageComponentInteraction> {
+export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends BasePagination<MessageComponentInteraction, Sent> {
     protected _buttons: Button[] = [];
     protected _onDisable: ButtonsOnDisable = ButtonsOnDisable.DisableComponents;
-    protected _authorDependend: boolean = true;
+    protected _authorDependent: boolean = true;
     protected _singlePageNoButtons: boolean = true;
     protected _timer: number = 20000;
     protected _collector: InteractionCollector<MappedInteractionTypes[MessageComponentType]>|null = null;
-    protected _collectorOptions?: Omit<MessageCollectorOptionsParams<MessageComponentType>, "timer">;
+    protected _collectorOptions?: Omit<MessageCollectorOptionsParams<MessageComponentType>, "time">;
 
     get buttons() { return this._buttons; }
     get onDisable() { return this._onDisable; }
-    get authorDependend() { return this._authorDependend; }
+    get authorDependent() { return this._authorDependent; }
     get singlePageNoButtons() { return this._singlePageNoButtons; }
     get timer() { return this._timer; }
-    get collector() { return this._collector; }
+    get collector() { return this._collector as If<Sent, InteractionCollector<MappedInteractionTypes[MessageComponentType]>>; }
     get collectorOptions() { return this._collectorOptions; }
 
     constructor(options?: ButtonPaginationData|ButtonPaginationBuilder) {
@@ -56,7 +56,7 @@ export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends Bas
 
         this.setButtons(...(options?.buttons ?? []));
         this.setOnDisable(options?.onDisable ?? this.onDisable);
-        this.setAuthorDependent(options?.authorDependend ?? this.authorDependend);
+        this.setAuthorDependent(options?.authorDependent ?? this.authorDependent);
         this.setSinglePageNoButtons(options?.singlePageNoButtons ?? this.singlePageNoButtons);
         this.setTimer(options?.timer ?? this.timer);
         this.setCollectorOptions(options?.collectorOptions ?? this.collectorOptions);
@@ -96,10 +96,10 @@ export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends Bas
 
     /**
      * Pagination will only works for command author
-     * @param authorDependend set author dependent
+     * @param authorDependent set author dependent
      */
-    public setAuthorDependent(authorDependend: boolean): this {
-        this._authorDependend = !!authorDependend;
+    public setAuthorDependent(authorDependent: boolean): this {
+        this._authorDependent = !!authorDependent;
         return this;
     }
 
@@ -116,7 +116,7 @@ export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends Bas
      * Custom collector options
      * @param collectorOptions collector options
      */
-    public setCollectorOptions(collectorOptions?: Omit<MessageCollectorOptionsParams<MessageComponentType>, "timer">|null): this {
+    public setCollectorOptions(collectorOptions?: Omit<MessageCollectorOptionsParams<MessageComponentType>, "time">|null): this {
         this._collectorOptions = collectorOptions || undefined;
         return this;
     }
@@ -138,14 +138,18 @@ export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends Bas
         this._paginationComponent = new ActionRowBuilder<MessageActionRowComponentBuilder>()
             .setComponents(this.buttons.map(b => b.builder));
 
-        if (this.pages.length <= 1 && this.singlePageNoButtons) this._removeComponents = true;
+        if (this.pages.length <= 1 && this.singlePageNoButtons) this._removePaginationComponents = true;
 
         await this._sendPage(this.currentPage!, getEnumValue(SendAs, sendAs));
+
         this.emit('ready');
+        this._addCollector();
 
-        if (!this._removeComponents) this._addCollector();
+        return this as ButtonPaginationBuilder<true>;
+    }
 
-        return this;
+    public isSent(): this is ButtonPaginationBuilder<true> {
+        return super.isSent();
     }
 
     public toJSON(): ButtonPaginationData {
@@ -153,7 +157,7 @@ export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends Bas
             ...super.toJSON(),
             buttons: this.buttons,
             onDisable: this.onDisable,
-            authorDependend: this.authorDependend,
+            authorDependent: this.authorDependent,
             singlePageNoButtons: this.singlePageNoButtons,
             timer: this.timer,
             collectorOptions: this.collectorOptions
@@ -168,10 +172,11 @@ export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends Bas
             time: this.timer
         });
 
-        this._collector.on('collect', async component => {
+        this.collector.on('collect', async component => {
             this.emit('collect', component);
 
-            if (this.authorDependend && this.authorId !== component.user.id) return;
+            if (!component.isButton()) return;
+            if (this.authorDependent && this.authorId && this.authorId !== component.user.id) return;
 
             const button = this.buttons.find(b => (b.builder.data as APIButtonComponentWithCustomId).custom_id === component.customId);
             if (!button) return;
@@ -200,17 +205,17 @@ export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends Bas
             if (!component.deferred) await component.deferUpdate().catch(() => {})
         });
 
-        this._collector.on('end', async (collected, reason) => {
+        this.collector.on('end', async (collected, reason) => {
             this.emit('end', reason);
 
             switch (this.onDisable) {
                 case ButtonsOnDisable.RemoveComponents:
-                    this._removeComponents = true;
+                    this._removeAllComponents = true;
 
                     await this.setCurrentPage().catch(() => {});
                     break;
                 case ButtonsOnDisable.DisableComponents:
-                    this._disableComponents = true;
+                    this._disableAllComponents = true;
 
                     await this.setCurrentPage().catch(() => {});
                     break;

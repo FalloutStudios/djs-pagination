@@ -1,4 +1,4 @@
-import { ActionRow, ActionRowBuilder, ActionRowData, Awaitable, If, Message, MessageActionRowComponent, MessageActionRowComponentBuilder, MessageActionRowComponentData, normalizeArray, RepliableInteraction, RestOrArray, UserResolvable } from 'discord.js';
+import { ActionRowBuilder, ActionRowData, Awaitable, If, JSONEncodable, Message, MessageActionRowComponent, MessageActionRowComponentBuilder, MessageActionRowComponentData, normalizeArray, RepliableInteraction, RestOrArray, UserResolvable } from 'discord.js';
 import EventEmitter from 'events';
 import { DynamicPageFunction, PageData, PageResolvable, resolvePage } from '../types/page';
 import { SendAs } from '../types/enums';
@@ -43,8 +43,9 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
     protected _authorId: string|null = null;
 
     protected _paginationComponent: ActionRowData<MessageActionRowComponent|MessageActionRowComponentData>|ActionRowBuilder<MessageActionRowComponentBuilder>|null = null;
-    protected _disableComponents: boolean = false;
-    protected _removeComponents: boolean = false;
+    protected _disableAllComponents: boolean = false;
+    protected _removeAllComponents: boolean = false;
+    protected _removePaginationComponents: boolean = false;
 
     get pages() { return this._pages; }
     get currentPageIndex() { return this._currentPageIndex; }
@@ -62,7 +63,7 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
         return (this.command instanceof Message ? this.command.author.id : this.command?.user?.id) || null;
     }
 
-    constructor(options?: BasePaginationData) {
+    constructor(options?: BasePaginationData|BasePagination<Collected>) {
         super();
 
         this.setPages(...(options?.pages ?? []));
@@ -125,11 +126,9 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
 
         if (!pageData) return pageData;
 
-        let components = this._removeComponents
-            ? []
-            : [...this.components, ...(this._paginationComponent !== null ? [this._paginationComponent] : [])];
+        let components = this._removeAllComponents ? [] : [...this.components, ...(this._paginationComponent !== null && !this._removePaginationComponents ? [this._paginationComponent] : [])];
 
-        if (this._disableComponents) components = components.map(c => {
+        if (this._disableAllComponents) components = components.map(c => {
             if (c === undefined) return c;
 
             const actionrow = c instanceof ActionRowBuilder

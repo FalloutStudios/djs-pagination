@@ -2,10 +2,10 @@ import { ButtonBuilder, InteractionButtonComponentData } from 'discord.js';
 import { PaginationControllerType } from './enums';
 
 export enum ButtonsOnDisable {
-    RemoveComponents = 1,
+    Ignore = 1,
+    RemoveComponents,
     DisableComponents,
-    DeletePagination,
-    Ignore
+    DeletePagination
 }
 
 export interface Button {
