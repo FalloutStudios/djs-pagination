@@ -1,7 +1,7 @@
 {
     "description": "Discord.js v14 button and reaction pagination",
     "author": "FalloutStudios",
-    "name": "@falloustudios/djs-pagination",
+    "name": "@falloutstudios/djs-pagination",
     "main": "./dist/cjs/index.js",
     "types": "./dist/types/index.d.ts",
     "module": "./dist/mjs/index.js",
