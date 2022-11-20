@@ -126,7 +126,7 @@ export class ReactionPaginationBuilder<Sent extends boolean = boolean> extends B
 
         this._command = command;
 
-        const page = this.currentPage;
+        const page = await this.currentPage;
 
         if (!(command instanceof Message) && (command.ephemeral === true || command.ephemeral === null && page?.ephemeral)) throw new Error("Reactions cannot be added to ephemeral messages");
 

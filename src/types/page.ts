@@ -1,8 +1,8 @@
-import { ActionRow, ActionRowBuilder, ActionRowData, Embed, EmbedBuilder, MessageActionRowComponent, MessageActionRowComponentBuilder, MessageActionRowComponentData, MessageCreateOptions } from 'discord.js';
+import { ActionRow, ActionRowBuilder, ActionRowData, Awaitable, Embed, EmbedBuilder, MessageActionRowComponent, MessageActionRowComponentBuilder, MessageActionRowComponentData, MessageCreateOptions } from 'discord.js';
 
 export type PageResolvable = StaticPageResolvable|DynamicPageFunction;
 export type StaticPageResolvable = string|PageData|EmbedBuilder|Embed;
-export type DynamicPageFunction = () => PageResolvable;
+export type DynamicPageFunction = () => Awaitable<PageResolvable>;
 
 export interface PageData extends Pick<MessageCreateOptions, 'allowedMentions' | 'content' | 'embeds' | 'files' | 'nonce' | 'stickers'> {
     components?: (ActionRowBuilder<MessageActionRowComponentBuilder>|ActionRow<MessageActionRowComponent>|ActionRowData<MessageActionRowComponent|MessageActionRowComponentData>)[];
@@ -12,7 +12,10 @@ export interface PageData extends Pick<MessageCreateOptions, 'allowedMentions' |
     ephemeral?: boolean;
 }
 
-export function resolvePage(page: PageResolvable): PageData {
+export function resolvePage(page: StaticPageResolvable): PageData;
+export function resolvePage(page: DynamicPageFunction): Promise<PageData>;
+export function resolvePage(page: PageResolvable): Promise<PageData>|PageData;
+export function resolvePage(page: PageResolvable): Promise<PageData>|PageData {
     if (page instanceof Embed || page instanceof EmbedBuilder) {
         return { content: '', embeds: [page], components: [] };
     } else if (typeof page === 'string') {
@@ -20,7 +23,7 @@ export function resolvePage(page: PageResolvable): PageData {
     } else if (typeof page === 'object' && !Array.isArray(page)){
         return page;
     } else if (typeof page === 'function') {
-        return resolvePage(page());
+        return (async () => resolvePage(await page()))();
     }
 
     throw new Error('Unresolvable pagination page');

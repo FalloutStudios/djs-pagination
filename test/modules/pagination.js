@@ -1,7 +1,8 @@
 // @ts-check
-import { ButtonBuilder, ButtonStyle } from 'discord.js';
+import { ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { MessageCommandBuilder, SlashCommandBuilder } from 'reciple';
 import { ButtonPaginationBuilder, ReactionPaginationBuilder } from '@falloutstudios/djs-pagination';
+import { randomUUID } from 'crypto';
 
 export class PaginationModule {
     versions = '^6';
@@ -13,7 +14,8 @@ export class PaginationModule {
             'Page 2',
             'Page 3',
             'Page 4',
-            'Page 5'
+            'Page 5',
+            async () => new EmbedBuilder().setDescription(randomUUID()).setColor('Random')
         ];
 
         /**

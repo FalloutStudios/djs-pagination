@@ -122,9 +122,9 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
      * Get page data by index
      * @param pageIndex page index
      */
-    public getPage(pageIndex: number): PageData|undefined {
+    public async getPage(pageIndex: number): Promise<PageData|undefined> {
         const page = this.pages.find((p, i) => i === pageIndex);
-        const pageData = typeof page === 'function' ? resolvePage(page()) : page;
+        const pageData = page ? await resolvePage(page) : undefined;
 
         if (!pageData) return pageData;
 
@@ -180,7 +180,7 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
      * @param pageIndex page index
      */
     public async setCurrentPage(pageIndex?: number): Promise<PageData> {
-        const page = pageIndex !== undefined ? this.getPage(pageIndex) : this.currentPage;
+        const page = await (pageIndex !== undefined ? this.getPage(pageIndex) : this.currentPage);
         if (!page) throw new RangeError(`Cannot find page index '${pageIndex}'`);
 
         this._currentPageIndex = pageIndex ?? this.currentPageIndex;
@@ -192,7 +192,7 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
                 await this.pagination.edit(page);
             }
 
-            this.emit('pageChange', this.currentPage!, this.currentPageIndex);
+            this.emit('pageChange', (await this.currentPage)!, this.currentPageIndex);
         }
 
         return page;
@@ -251,7 +251,7 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
      * Resolve pagination pages
      * @param pages resolvable pages
      */
-    public static resolvePages(...pages: RestOrArray<PageResolvable>): PageData[] {
-        return normalizeArray(pages).map(p => resolvePage(p));
+    public static async resolvePages(...pages: RestOrArray<PageResolvable>): Promise<PageData[]> {
+        return Promise.all(normalizeArray(pages).map(p => resolvePage(p)));
     }
 }

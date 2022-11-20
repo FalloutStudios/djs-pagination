@@ -140,7 +140,7 @@ export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends Bas
 
         if (this.pages.length <= 1 && this.singlePageNoButtons) this._removePaginationComponents = true;
 
-        await this._sendPage(this.currentPage!, getEnumValue(SendAs, sendAs));
+        await this._sendPage((await this.currentPage)!, getEnumValue(SendAs, sendAs));
 
         this.emit('ready');
         this._addCollector();
