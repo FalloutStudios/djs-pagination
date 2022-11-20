@@ -212,12 +212,12 @@ export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends Bas
                 case ButtonsOnDisable.RemoveComponents:
                     this._removeAllComponents = true;
 
-                    await this.setCurrentPage().catch(() => {});
+                    await this.setCurrentPage(undefined, true).catch(() => {});
                     break;
                 case ButtonsOnDisable.DisableComponents:
                     this._disableAllComponents = true;
 
-                    await this.setCurrentPage().catch(() => {});
+                    await this.setCurrentPage(undefined, true).catch(() => {});
                     break;
                 case ButtonsOnDisable.DeletePagination:
                     if (this.pagination?.deletable) await this.pagination.delete().catch(() => {});

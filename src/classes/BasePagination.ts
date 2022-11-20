@@ -179,7 +179,7 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
      * Set current pagination page by index
      * @param pageIndex page index
      */
-    public async setCurrentPage(pageIndex?: number): Promise<PageData> {
+    public async setCurrentPage(pageIndex?: number, editComponentsOnly: boolean = false): Promise<PageData> {
         const page = await (pageIndex !== undefined ? this.getPage(pageIndex) : this.currentPage);
         if (!page) throw new RangeError(`Cannot find page index '${pageIndex}'`);
 
@@ -187,9 +187,9 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
 
         if (this.isSent()) {
             if (!(this.command instanceof Message)) {
-                await this.command.editReply(page);
+                await this.command.editReply(!editComponentsOnly ? page : { components: page.components });
             } else {
-                await this.pagination.edit(page);
+                await this.pagination.edit(!editComponentsOnly ? page : { components: page.components });
             }
 
             this.emit('pageChange', (await this.currentPage)!, this.currentPageIndex);
