@@ -11,12 +11,17 @@ export class MemeModule {
 
         if (request.status !== 200) return embed.setAuthor({ name: `An error occured` }).setColor('Red');
 
-        return embed
-            .setAuthor({ name: `r/${request.data.subreddit}`, url: request.data.postLink })
-            .setTitle(request.data.title)
-            .setURL(request.data.postLink)
-            .setImage(request.data.url)
-            .setFooter({ text: `🔼 ${request.data.ups} ┃ u/${request.data.author}` });
+        return {
+            embeds: [
+                embed
+                    .setAuthor({ name: `r/${request.data.subreddit}`, url: request.data.postLink })
+                    .setTitle(request.data.title)
+                    .setURL(request.data.postLink)
+                    .setImage(request.data.url)
+                    .setFooter({ text: `🔼 ${request.data.ups} ┃ u/${request.data.author}` })
+            ],
+            ephemeral: true
+        };
     }
 
     versions = ['^6'];
@@ -27,7 +32,7 @@ export class MemeModule {
             .setExecute(async data => {
                 const pagination = new ButtonPaginationBuilder({
                     pages: [
-                        () => this.getMeme()
+                        async () => this.getMeme()
                     ],
                     buttons: [
                         {
@@ -40,7 +45,7 @@ export class MemeModule {
                         }
                     ],
                     timer: 1000 * 20,
-                    onDisable: 'RemoveComponents',
+                    onDisable: 'DeletePagination',
                     singlePageNoButtons: false
                 });
 
