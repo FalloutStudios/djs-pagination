@@ -196,7 +196,11 @@ export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends Bas
                     await this.setCurrentPage(undefined, true).catch(() => {});
                     break;
                 case ButtonsOnDisable.DeletePagination:
-                    if (this.pagination?.deletable) await this.pagination.delete().catch(() => {});
+                    if (this.command instanceof Message) {
+                        await this.pagination?.delete().catch(() => {});
+                    } else {
+                        await this.command?.deleteReply().catch(() => {});
+                    }
                     break;
             }
         });

@@ -1,9 +1,5 @@
 import { ActionRow, ActionRowBuilder, ActionRowData, Awaitable, Embed, EmbedBuilder, MessageActionRowComponent, MessageActionRowComponentBuilder, MessageActionRowComponentData, MessageCreateOptions } from 'discord.js';
 
-export type PageResolvable = StaticPageResolvable|DynamicPageFunction;
-export type StaticPageResolvable = string|PageData|EmbedBuilder|Embed;
-export type DynamicPageFunction = () => Awaitable<PageResolvable>;
-
 export interface PageData extends Pick<MessageCreateOptions, 'allowedMentions' | 'content' | 'embeds' | 'files' | 'nonce' | 'stickers'> {
     components?: (ActionRowBuilder<MessageActionRowComponentBuilder>|ActionRow<MessageActionRowComponent>|ActionRowData<MessageActionRowComponent|MessageActionRowComponentData>)[];
     /**
@@ -11,6 +7,10 @@ export interface PageData extends Pick<MessageCreateOptions, 'allowedMentions' |
      */
     ephemeral?: boolean;
 }
+
+export type PageResolvable = StaticPageResolvable|DynamicPageFunction;
+export type StaticPageResolvable = string|PageData|EmbedBuilder|Embed;
+export type DynamicPageFunction = () => PageResolvable|Promise<PageResolvable>;
 
 export function resolvePage(page: StaticPageResolvable): PageData;
 export function resolvePage(page: DynamicPageFunction): Promise<PageData>;
