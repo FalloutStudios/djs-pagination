@@ -6,7 +6,7 @@ import { ButtonPaginationBuilder } from "@falloutstudios/djs-pagination";
 
 export class MemeModule {
     async getMeme() {
-        const request = (await axios.get('https://meme-api.herokuapp.com/gimme/dankmemes'));
+        const request = (await axios.get('https://meme-api.com/gimme/dankmemes'));
         const embed = new EmbedBuilder();
 
         if (request.status !== 200) return embed.setAuthor({ name: `An error occured` }).setColor('Red');
