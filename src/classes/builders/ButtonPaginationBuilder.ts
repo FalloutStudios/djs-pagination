@@ -1,4 +1,4 @@
-import { ActionRowBuilder, APIButtonComponentWithCustomId, Awaitable, ButtonBuilder, ButtonInteraction, ButtonStyle, CacheType, If, InteractionButtonComponentData, InteractionCollector, MappedInteractionTypes, Message, MessageActionRowComponentBuilder, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, normalizeArray, RepliableInteraction, RestOrArray } from 'discord.js';
+import { ActionRowBuilder, APIButtonComponentWithCustomId, Awaitable, ButtonBuilder, ButtonInteraction, ButtonStyle, CacheType, If, InteractionButtonComponentData, InteractionCollector, JSONEncodable, MappedInteractionTypes, Message, MessageActionRowComponentBuilder, MessageCollectorOptionsParams, MessageComponentInteraction, MessageComponentType, normalizeArray, RepliableInteraction, RestOrArray } from 'discord.js';
 import { Button, ButtonsOnDisable, RawButton } from '../../types/buttons';
 import { getEnumValue, PaginationControllerType, SendAs } from '../../types/enums';
 import { BasePagination, BasePaginationData, BasePaginationEvents } from '../BasePagination';
@@ -6,9 +6,7 @@ import { BasePagination, BasePaginationData, BasePaginationEvents } from '../Bas
 export interface ButtonPaginationData extends BasePaginationData {
     buttons?: RawButton[];
     onDisable?: ButtonsOnDisable|keyof typeof ButtonsOnDisable;
-    authorDependent?: boolean;
     singlePageNoButtons?: boolean;
-    timer?: number;
     collectorOptions?: Omit<MessageCollectorOptionsParams<MessageComponentType>, "time">;
 }
 
@@ -37,28 +35,26 @@ export interface ButtonPaginationBuilder<Sent extends boolean = boolean> extends
 export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends BasePagination<MessageComponentInteraction, Sent> {
     protected _buttons: Button[] = [];
     protected _onDisable: ButtonsOnDisable = ButtonsOnDisable.DisableComponents;
-    protected _authorDependent: boolean = true;
     protected _singlePageNoButtons: boolean = true;
-    protected _timer: number = 20000;
     protected _collector: InteractionCollector<MappedInteractionTypes[MessageComponentType]>|null = null;
     protected _collectorOptions?: Omit<MessageCollectorOptionsParams<MessageComponentType>, "time">;
 
     get buttons() { return this._buttons; }
     get onDisable() { return this._onDisable; }
-    get authorDependent() { return this._authorDependent; }
     get singlePageNoButtons() { return this._singlePageNoButtons; }
-    get timer() { return this._timer; }
     get collector() { return this._collector as If<Sent, InteractionCollector<MappedInteractionTypes[MessageComponentType]>>; }
     get collectorOptions() { return this._collectorOptions; }
 
-    constructor(options?: ButtonPaginationData|ButtonPaginationBuilder) {
+    constructor(options?: ButtonPaginationData|JSONEncodable<ButtonPaginationData>) {
+        options = (options as ButtonPaginationBuilder).toJSON !== undefined
+            ? (options as ButtonPaginationBuilder).toJSON()
+            : options as ButtonPaginationData;
+
         super(options);
 
         this.setButtons(...(options?.buttons ?? []));
         this.setOnDisable(options?.onDisable ?? this.onDisable);
-        this.setAuthorDependent(options?.authorDependent ?? this.authorDependent);
         this.setSinglePageNoButtons(options?.singlePageNoButtons ?? this.singlePageNoButtons);
-        this.setTimer(options?.timer ?? this.timer);
         this.setCollectorOptions(options?.collectorOptions ?? this.collectorOptions);
     }
 
@@ -95,15 +91,6 @@ export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends Bas
     }
 
     /**
-     * Pagination will only works for command author
-     * @param authorDependent set author dependent
-     */
-    public setAuthorDependent(authorDependent: boolean): this {
-        this._authorDependent = !!authorDependent;
-        return this;
-    }
-
-    /**
      * Disable pagination controllers with single page pagination
      * @param singlePageNoButtons single page no buttons
      */
@@ -118,15 +105,6 @@ export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends Bas
      */
     public setCollectorOptions(collectorOptions?: Omit<MessageCollectorOptionsParams<MessageComponentType>, "time">|null): this {
         this._collectorOptions = collectorOptions || undefined;
-        return this;
-    }
-
-    /**
-     * Collector timer
-     * @param timer timer in milliseconds
-     */
-    public setTimer(timer: number): this {
-        this._timer = timer;
         return this;
     }
 
@@ -157,9 +135,7 @@ export class ButtonPaginationBuilder<Sent extends boolean = boolean> extends Bas
             ...super.toJSON(),
             buttons: this.buttons,
             onDisable: this.onDisable,
-            authorDependent: this.authorDependent,
             singlePageNoButtons: this.singlePageNoButtons,
-            timer: this.timer,
             collectorOptions: this.collectorOptions
         }
     }

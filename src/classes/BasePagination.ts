@@ -5,8 +5,10 @@ import { SendAs } from '../types/enums';
 
 export interface BasePaginationData {
     pages?: PageResolvable[];
+    authorDependent?: boolean;
     authorId?: UserResolvable|null;
     currentPageIndex?: number;
+    timer?: number;
     components?: (ActionRowData<MessageActionRowComponent|MessageActionRowComponentData>|ActionRowBuilder<MessageActionRowComponentBuilder>)[];
 }
 
@@ -39,7 +41,9 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
     protected _pages: (PageData|DynamicPageFunction)[] = [];
     protected _authorId: string|null = null;
     protected _currentPageIndex: number = 0;
+    protected _timer: number = 20000;
     protected _pagination: Message|null = null;
+    protected _authorDependent: boolean = true;
     protected _command: Message|RepliableInteraction|null = null;
     protected _components: (ActionRowData<MessageActionRowComponent|MessageActionRowComponentData>|ActionRowBuilder<MessageActionRowComponentBuilder>)[] = [];
 
@@ -51,7 +55,9 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
     get pages() { return this._pages; }
     get currentPageIndex() { return this._currentPageIndex; }
     get currentPage() { return this.getPage(this.currentPageIndex); }
+    get timer() { return this._timer; }
     get pagination() { return this._pagination as If<Sent, Message>; }
+    get authorDependent() { return this._authorDependent; }
     get command() { return this._command as If<Sent, Message|RepliableInteraction>; }
     get components() { return this._components; }
 
@@ -64,11 +70,17 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
         return (this.command instanceof Message ? this.command.author.id : this.command?.user?.id) || null;
     }
 
-    constructor(options?: BasePaginationData|BasePagination<Collected>) {
+    constructor(options?: BasePaginationData|JSONEncodable<BasePaginationData>) {
         super();
+
+        options = (options as BasePagination<Collected>).toJSON !== undefined
+            ? (options as BasePagination<Collected>).toJSON()
+            : options as BasePaginationData;
 
         this.setPages(...(options?.pages ?? []));
         this.setAuthorId(options?.authorId);
+        this.setAuthorDependent(options.authorDependent ?? this.authorDependent);
+        this.setTimer(options?.timer ?? this.timer);
 
         this._currentPageIndex = options?.currentPageIndex ?? this.currentPageIndex;
     }
@@ -88,6 +100,15 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
      */
     public setPages(...pages: RestOrArray<PageResolvable>): this {
         this._pages = BasePagination.resolveStaticPages(normalizeArray(pages));
+        return this;
+    }
+
+    /**
+     * Pagination will only works for command author
+     * @param authorDependent set author dependent
+     */
+    public setAuthorDependent(authorDependent: boolean): this {
+        this._authorDependent = !!authorDependent;
         return this;
     }
 
@@ -115,6 +136,15 @@ export class BasePagination<Collected, Sent extends boolean = boolean> extends E
      */
     public setComponents(...components: RestOrArray<ActionRowData<MessageActionRowComponent>|ActionRowBuilder<MessageActionRowComponentBuilder>>): this {
         this._components = normalizeArray(components).map(c => c instanceof ActionRowBuilder ? c : new ActionRowBuilder(c));
+        return this;
+    }
+
+    /**
+     * Collector timer
+     * @param timer timer in milliseconds
+     */
+    public setTimer(timer: number): this {
+        this._timer = timer;
         return this;
     }
 

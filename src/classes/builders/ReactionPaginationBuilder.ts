@@ -1,4 +1,4 @@
-import { Awaitable, If, IntentsBitField, Message, MessageReaction, normalizeArray, parseEmoji, ReactionCollector, ReactionCollectorOptions, RepliableInteraction, RestOrArray } from 'discord.js';
+import { Awaitable, If, IntentsBitField, JSONEncodable, Message, MessageReaction, normalizeArray, parseEmoji, ReactionCollector, ReactionCollectorOptions, RepliableInteraction, RestOrArray } from 'discord.js';
 import { getEnumValue, PaginationControllerType, SendAs } from '../../index';
 import { RawReaction, Reaction, ReactionsOnDisable } from '../../types/reactions';
 import { BasePagination, BasePaginationData, BasePaginationEvents } from '../BasePagination';
@@ -6,9 +6,7 @@ import { BasePagination, BasePaginationData, BasePaginationEvents } from '../Bas
 export interface ReactionPaginationData extends BasePaginationData {
     reactions?: (Reaction|RawReaction)[];
     onDisable?: ReactionsOnDisable|keyof typeof ReactionsOnDisable;
-    authorDependent?: boolean;
     singlePageNoReactions?: boolean;
-    timer?: number;
     collectorOptions?: Omit<ReactionCollectorOptions, 'time'>;
 }
 
@@ -37,22 +35,26 @@ export interface ReactionPaginationBuilder<Sent extends boolean = boolean> exten
 export class ReactionPaginationBuilder<Sent extends boolean = boolean> extends BasePagination<MessageReaction, Sent> {
     protected _reactions: Reaction[] = [];
     protected _onDisable: ReactionsOnDisable = ReactionsOnDisable.ClearPaginationReactions;
-    protected _authorDependent: boolean = true;
     protected _singlePageNoReactions: boolean = true;
-    protected _timer: number = 20000;
     protected _collector: ReactionCollector|null = null;
     protected _collectorOptions?: Omit<ReactionCollectorOptions, 'time'>;
 
     get reactions() { return this._reactions; }
     get onDisable() { return this._onDisable; }
-    get authorDependent() { return this._authorDependent; }
     get singlePageNoReactions() { return this._singlePageNoReactions; }
-    get timer() { return this._timer; }
     get collector() { return this._collector as If<Sent, ReactionCollector>; }
     get collectorOptions() { return this._collectorOptions; }
 
-    constructor(options?: ReactionPaginationData|ReactionPaginationBuilder) {
+    constructor(options?: ReactionPaginationData|JSONEncodable<ReactionPaginationData>) {
+        options = (options as ReactionPaginationBuilder).toJSON !== undefined
+            ? (options as ReactionPaginationBuilder).toJSON()
+            : options as ReactionPaginationData;
+
         super(options);
+
+        this.setReactions(...(options.reactions ?? []));
+        this.setOnDisable(options.onDisable ?? this.onDisable);
+        this.setSinglePageNoReactions(options.singlePageNoReactions ?? this.singlePageNoReactions);
     }
 
     /**
@@ -84,15 +86,6 @@ export class ReactionPaginationBuilder<Sent extends boolean = boolean> extends B
     }
 
     /**
-     * Pagination will only works for command author
-     * @param authorDependend set author dependent
-     */
-    public setAuthorDependent(authorDependent: boolean): this {
-        this._authorDependent = !!authorDependent;
-        return this;
-    }
-
-    /**
      * Disable reaction controllers on single page pagination
      * @param singlePageNoReactions single page no reactions
      */
@@ -107,15 +100,6 @@ export class ReactionPaginationBuilder<Sent extends boolean = boolean> extends B
      */
     public setCollectorOptions(collectorOptions: Omit<ReactionCollectorOptions, 'time'>): this {
         this._collectorOptions = collectorOptions;
-        return this;
-    }
-
-    /**
-     * Collector timer
-     * @param timer timer in milliseconds
-     */
-    public setTimer(timer: number): this {
-        this._timer = timer;
         return this;
     }
 
@@ -148,9 +132,7 @@ export class ReactionPaginationBuilder<Sent extends boolean = boolean> extends B
             ...super.toJSON(),
             reactions: this.reactions,
             onDisable: this.onDisable,
-            authorDependent: this.authorDependent,
             singlePageNoReactions: this.singlePageNoReactions,
-            timer: this.timer,
             collectorOptions: this.collectorOptions
         };
     }
