@@ -1,3 +1,5 @@
+# Moved to [New Repository](https://github.com/FalloutStudios/djs/tree/main/packages/pagination)
+
 # Djs Pagination
 ![npm bundle size (scoped)](https://img.shields.io/bundlephobia/min/@falloutstudios/djs-pagination?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/FalloutStudios/djs-pagination?style=flat-square)
